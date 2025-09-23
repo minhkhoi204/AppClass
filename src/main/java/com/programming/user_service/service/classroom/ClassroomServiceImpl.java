@@ -21,8 +21,10 @@ public class ClassroomServiceImpl implements ClassroomService {
     }
 
     @Override
-    public Optional<Classroom> getClassroomById(Long id) {
-        return classroomRepository.findById(id);
+    public Classroom getClassroomById(Long id) {
+        //check
+        return classroomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found for id " + id));
     }
 
     @Override

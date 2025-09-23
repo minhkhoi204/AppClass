@@ -22,7 +22,7 @@ public class ClassroomController {
     private final ClassroomService classroomService;
 
     // Tạo lớp
-    @PostMapping("/classroom")
+    @PostMapping()
     public ResponseEntity<ApiResponse> createClassroom(@RequestBody Classroom classroom) {
         Classroom saved = classroomService.createClassroom(classroom);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -32,13 +32,8 @@ public class ClassroomController {
     // Xem chi tiết lớp
     @GetMapping("/{classroomId}")
     public ResponseEntity<ApiResponse> getClassroom(@PathVariable Long classroomId) {
-        try {
-            Classroom classroom = classroomService.getClassroomById(classroomId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + classroomId));
-            return ResponseEntity.ok(new ApiResponse("Success", classroom));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
+        var classroom = classroomService.getClassroomById(classroomId);
+        return ResponseEntity.ok(new ApiResponse("Success", classroom));
     }
 
     // Xem tất cả lớp
@@ -52,22 +47,14 @@ public class ClassroomController {
     @PutMapping("/{classroomId}/update")
     public ResponseEntity<ApiResponse> updateClassroom(@PathVariable Long classroomId,
                                                        @RequestBody Classroom classroomDetails) {
-        try {
-            Classroom updated = classroomService.updateClassroom(classroomId, classroomDetails);
-            return ResponseEntity.ok(new ApiResponse("Classroom updated successfully", updated));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
+        Classroom updated = classroomService.updateClassroom(classroomId, classroomDetails);
+        return ResponseEntity.ok(new ApiResponse("Classroom updated successfully", updated));
     }
 
     // Xóa lớp
     @DeleteMapping("/{classroomId}/delete")
     public ResponseEntity<ApiResponse> deleteClassroom(@PathVariable Long classroomId) {
-        try {
-            classroomService.deleteClassroom(classroomId);
-            return ResponseEntity.ok(new ApiResponse("Classroom deleted successfully", null));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
-        }
+        classroomService.deleteClassroom(classroomId);
+        return ResponseEntity.ok(new ApiResponse("Classroom deleted successfully", null));
     }
 }

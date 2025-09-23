@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface ClassroomService {
     Classroom createClassroom(Classroom classroom);
-    Optional<Classroom> getClassroomById(Long id);
+    Classroom getClassroomById(Long id);
     List<Classroom> getAllClassrooms();
     Classroom updateClassroom(Long id, Classroom classroomDetails);
     void deleteClassroom(Long id);
