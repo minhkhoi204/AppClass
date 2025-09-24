@@ -20,13 +20,29 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    // Thêm học sinh vào lớp (giống addItemToCart)
-    @PostMapping("classroom/{classroomId}/add")
-    public ResponseEntity<ApiResponse> addStudentToClassroom(
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse> createStudent(@RequestBody StudentDto dto) {
+        Student saved = studentService.createStudent(dto);
+        StudentDto response = studentService.convertToDto(saved);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse("Student created successfully", response));
+    }
+
+    @PostMapping("/add-existing/{studentId}/classroom/{classroomId}")
+    public ResponseEntity<ApiResponse> addExistingStudentToClassroom(
             @PathVariable Long classroomId,
-            @RequestBody Student student) {
+            @PathVariable Long studentId) {
+        studentService.addExistingStudentToClassroom(classroomId, studentId);
+        return ResponseEntity.ok(new ApiResponse("Student added to classroom", null));
+    }
+
+    // Thêm học sinh vào lớp (giống addItemToCart)
+    @PostMapping("/add/classroom/{classroomId}")
+    public ResponseEntity<ApiResponse> createStudentInClassroom(
+            @PathVariable Long classroomId,
+            @RequestBody StudentDto dto) {
         try {
-            studentService.addStudentToClassroom(classroomId, student);
+            studentService.createStudentInClassroom(classroomId, dto);
             return ResponseEntity.ok(new ApiResponse("Student added to classroom", null));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
@@ -34,7 +50,7 @@ public class StudentController {
     }
 
     // Xóa học sinh khỏi lớp (giống removeItemFromCart)
-    @DeleteMapping("/classroom/{classroomId}/student/{studentId}/remove")
+    @DeleteMapping("/student/{studentId}/classroom/{classroomId}/remove")
     public ResponseEntity<ApiResponse> removeStudentFromClassroom(
             @PathVariable Long classroomId,
             @PathVariable Long studentId) {
@@ -47,21 +63,23 @@ public class StudentController {
     }
 
     // Cập nhật thông tin học sinh trong lớp (giống updateItemQuantity)
-    @PutMapping("/classroom/{classroomId}/student//{studentId}/update")
+    @PutMapping("/student/{studentId}/classroom/{classroomId}/update")
     public ResponseEntity<ApiResponse> updateStudentInClassroom(
             @PathVariable Long classroomId,
             @PathVariable Long studentId,
-            @RequestBody Student updatedStudent) {
+            @RequestBody StudentDto updatedStudent) {
         try {
-            studentService.updateStudentInClassroom(classroomId, studentId, updatedStudent);
-            return ResponseEntity.ok(new ApiResponse("Student updated successfully", null));
+            StudentDto updatedDto = studentService.updateStudentInClassroom(classroomId, studentId, updatedStudent);
+            return ResponseEntity.ok(new ApiResponse("Student updated successfully", updatedDto));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(e.getMessage(), null));
         }
     }
 
     // Xem danh sách học sinh trong lớp
-    @GetMapping("/classroom/{classroomId}/students")
+    @GetMapping("/classroom/{classroomId}")
     public ResponseEntity<ApiResponse> getStudentsInClassroom(@PathVariable Long classroomId) {
         try {
             List<Student> students = studentService.getStudentsInClassroom(classroomId);

@@ -2,15 +2,16 @@ package com.programming.user_service.dto;
 
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class StudentDto {
-    private Long userId;
-
+    private Long id;
     private String fullName;
     private String saintName;
-    private String email;
-    private String phone;
+    private LocalDate dateOfBirth;
 
+    // parents info
     private String fatherName;
     private String fatherPhoneNum;
     private String motherName;
@@ -18,4 +19,6 @@ public class StudentDto {
     private String address;
 
     private String classroomName; // thay vì classJoined
+
+    private Long userId; // lấy từ User nếu đã link
 }

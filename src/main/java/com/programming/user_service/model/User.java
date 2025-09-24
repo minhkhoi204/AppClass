@@ -23,9 +23,10 @@ public class User {
     @Column(nullable=false)
     private String password;
 
-    private String saintName;
-    private String fullName;
+    @Column(unique = true)   // không bắt buộc nhưng nếu có thì phải unique
     private String email;
+
+    @Column(unique = true)   // tương tự
     private String phone;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -35,4 +36,8 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
+
+    @OneToOne(mappedBy = "user")
+    private Student student;  // liên kết ngược
+
 }

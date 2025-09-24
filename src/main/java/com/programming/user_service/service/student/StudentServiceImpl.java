@@ -3,11 +3,13 @@ package com.programming.user_service.service.student;
 import com.programming.user_service.dto.StudentDto;
 import com.programming.user_service.exceptions.AlreadyExistsException;
 import com.programming.user_service.exceptions.ResourceNotFoundException;
+import com.programming.user_service.mapper.StudentMapper;
 import com.programming.user_service.model.Classroom;
 import com.programming.user_service.model.Student;
 import com.programming.user_service.model.User;
 import com.programming.user_service.repository.ClassroomRepository;
 import com.programming.user_service.repository.StudentRepository;
+import com.programming.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
@@ -18,94 +20,88 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
-    private final ModelMapper modelMapper;
+    private final StudentMapper studentMapper;
     private final StudentRepository studentRepository;
-    private final ClassroomRepository classroomRepository; // 👈 inject vào đây
-
+    private final ClassroomRepository classroomRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public Student createStudent(Student student) {
-        if (studentRepository.existsById(student.getUserId())) {
-            throw new AlreadyExistsException("Student already exists for userId " + student.getUserId());
+    public Student createStudent(StudentDto dto) {
+        // Nếu có User thì lấy ra từ DB, còn không thì student sẽ chưa có user
+        User user = null;
+        if (dto.getUserId() != null) {
+            user = userRepository.findById(dto.getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + dto.getUserId()));
+
+            // Check nếu user này đã gắn với 1 student rồi
+            if (studentRepository.findByUserId(dto.getUserId()).isPresent()) {
+                throw new AlreadyExistsException("Student already exists for userId " + dto.getUserId());
+            }
         }
+
+        Student student = studentMapper.toEntity(dto);
+        student.setUser(user);
+
         return studentRepository.save(student);
     }
 
-
     @Override
-    public Optional<Student> getStudentById(Long id) {
-        return studentRepository.findById(id);
-    }
+    public void addExistingStudentToClassroom(Long classroomId, Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
 
-    @Override
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
-    }
-
-    @Override
-    public Student updateStudent(Long id, Student studentDetails) {
-        return studentRepository.findById(id).map(student -> {
-            student.setFatherName(studentDetails.getFatherName());
-            student.setFatherPhoneNum(studentDetails.getFatherPhoneNum());
-            student.setMotherName(studentDetails.getMotherName());
-            student.setMotherPhoneNum(studentDetails.getMotherPhoneNum());
-            student.setAddress(studentDetails.getAddress());
-            student.setClassroom(studentDetails.getClassroom());
-            return studentRepository.save(student);
-        }).orElseThrow(() -> new RuntimeException("Student not found"));
-    }
-
-    @Override
-    public void deleteStudent(Long id) {
-        studentRepository.deleteById(id);
-    }
-
-
-    /*public StudentDto convertToDto(Student student) {
-        User user = student.getUser();
-
-        StudentDto dto = new StudentDto();
-        dto.setUserId(user.getId());
-        dto.setFullName(user.getFullName());
-        dto.setSaintName(user.getSaintName());
-        dto.setEmail(user.getEmail());
-        dto.setPhone(user.getPhone());
-        dto.setFatherName(student.getFatherName());
-        dto.setFatherPhoneNum(student.getFatherPhoneNum());
-        dto.setMotherName(student.getMotherName());
-        dto.setMotherPhoneNum(student.getMotherPhoneNum());
-        dto.setAddress(student.getAddress());
-        dto.setClassJoined(student.getClassJoined());
-
-        return dto;
-    }*/
-    @Override
-    public StudentDto convertToDto(Student student) {
-        StudentDto studentDto = modelMapper.map(student, StudentDto.class);
-
-        User user = student.getUser();
-        if (user != null) {
-            studentDto.setUserId(user.getId());
-            studentDto.setSaintName(user.getSaintName());
-            studentDto.setFullName(user.getFullName());
-            studentDto.setEmail(user.getEmail());
-            studentDto.setPhone(user.getPhone());
-        }
-
-        if (student.getClassroom() != null) {
-            studentDto.setClassroomName(student.getClassroom().getName());
-        }
-
-        return studentDto;
-    }
-
-    @Override
-    public void addStudentToClassroom(Long classroomId, Student student) {
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + classroomId));
 
         student.setClassroom(classroom);
         studentRepository.save(student);
+    }
+
+    @Override
+    public StudentDto createStudentInClassroom(Long classroomId, StudentDto dto) {
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + classroomId));
+
+        // Tạo student mới từ DTO
+        Student student = studentMapper.toEntity(dto);
+
+        // Gán classroom
+        student.setClassroom(classroom);
+
+        // Không cần xử lý user
+        Student saved = studentRepository.save(student);
+
+        // Trả về DTO để client có thông tin (id, classroomName...)
+        return studentMapper.toStudentDto(saved);
+    }
+
+    @Override
+    public StudentDto updateStudentInClassroom(Long classroomId, Long studentId, StudentDto updatedDto) {
+        Student existing = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
+
+        if (existing.getClassroom() == null || !existing.getClassroom().getId().equals(classroomId)) {
+            throw new IllegalStateException("Student does not belong to this classroom");
+        }
+
+        // Cập nhật các trường cần thiết từ DTO\
+        existing.setSaintName(updatedDto.getSaintName());
+        existing.setFullName(updatedDto.getFullName());
+        existing.setFatherName(updatedDto.getFatherName());
+        existing.setFatherPhoneNum(updatedDto.getFatherPhoneNum());
+        existing.setMotherName(updatedDto.getMotherName());
+        existing.setMotherPhoneNum(updatedDto.getMotherPhoneNum());
+        existing.setAddress(updatedDto.getAddress());
+        existing.setDateOfBirth(updatedDto.getDateOfBirth());
+
+        Student saved = studentRepository.save(existing);
+
+        return studentMapper.toStudentDto(saved);
+    }
+
+    @Override
+    public StudentDto convertToDto(Student student) {
+        return studentMapper.toStudentDto(student);
     }
 
     @Override
@@ -118,7 +114,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         student.setClassroom(null);
-        studentRepository.save(student); // không xóa luôn student khỏi DB, chỉ xóa khỏi lớp
+        studentRepository.save(student); // không xóa student khỏi DB, chỉ bỏ khỏi lớp
     }
 
     @Override
@@ -126,7 +122,7 @@ public class StudentServiceImpl implements StudentService {
         Student existing = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
 
-        if (!existing.getClassroom().getId().equals(classroomId)) {
+        if (existing.getClassroom() == null || !existing.getClassroom().getId().equals(classroomId)) {
             throw new IllegalStateException("Student does not belong to this classroom");
         }
 
@@ -143,5 +139,4 @@ public class StudentServiceImpl implements StudentService {
     public List<Student> getStudentsInClassroom(Long classroomId) {
         return studentRepository.findAllByClassroomId(classroomId);
     }
-
 }

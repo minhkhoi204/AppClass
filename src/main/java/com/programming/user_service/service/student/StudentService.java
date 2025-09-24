@@ -7,15 +7,18 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudentService {
-    Student createStudent(Student student);
-    Optional<Student> getStudentById(Long id);
-    List<Student> getAllStudents();
-    Student updateStudent(Long id, Student studentDetails);
-    void deleteStudent(Long id);
+    Student createStudent(StudentDto studentDto);
 
-    void addStudentToClassroom(Long classroomId, Student student);
+    void addExistingStudentToClassroom(Long classroomId, Long studentId);
+
+    StudentDto createStudentInClassroom(Long classroomId, StudentDto studentDto);
+
+    StudentDto updateStudentInClassroom(Long classroomId, Long studentId, StudentDto updatedStudentDto);
+
     void removeStudentFromClassroom(Long classroomId, Long studentId);
+
     void updateStudentInClassroom(Long classroomId, Long studentId, Student updatedStudent);
+
     List<Student> getStudentsInClassroom(Long classroomId);
 
     StudentDto convertToDto(Student student);
