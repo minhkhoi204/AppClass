@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService, UserDetailsService { // implement interface
+public class UserServiceImpl implements UserService{
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService, UserDetailsService { // imp
     @Override
     public UserResponseDto createUser(UserRequestDto dto) {
         User user = userMapper.toUserEntity(dto);
-        user.setPassword(passwordEncoder.encode(user.getPassword())); // encode mật khẩu
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // encode
         userRepository.save(user);
         return userMapper.toUserResponseDto(user);
     }
@@ -37,19 +37,6 @@ public class UserServiceImpl implements UserService, UserDetailsService { // imp
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return userMapper.toUserResponseDto(user);
-    }
-
-    // method from UserDetailsService
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUserName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getUserName(),
-                user.getPassword(),
-                new ArrayList<>() // map roles
-        );
     }
 
     @Override

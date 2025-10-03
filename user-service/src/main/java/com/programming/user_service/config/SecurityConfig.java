@@ -14,18 +14,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final UserServiceImpl userServiceImpl; // Inject service implement UserDetailsService
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    // register bean UserDetailsService for Spring Security
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return userServiceImpl;
     }
 
     @Bean
