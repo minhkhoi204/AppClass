@@ -18,5 +18,9 @@ public class UserRequestDto {
 
     @NotBlank(message = "Saint name is required")
     private String saintName;
-}
 
+    private String email;
+
+    private String phone;
+
+}

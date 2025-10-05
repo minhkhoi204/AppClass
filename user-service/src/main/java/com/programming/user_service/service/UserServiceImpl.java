@@ -2,6 +2,7 @@ package com.programming.user_service.service;
 
 import com.programming.user_service.dto.UserRequestDto;
 import com.programming.user_service.dto.UserResponseDto;
+import com.programming.user_service.exception.AlreadyExistsException;
 import com.programming.user_service.exception.ResourceNotFoundException;
 import com.programming.user_service.mapper.UserMapper;
 import com.programming.user_service.model.User;
@@ -11,10 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +23,16 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserResponseDto createUser(UserRequestDto dto) {
+        // Check nếu username đã tồn tại
+        if (userRepository.existsByUserName(dto.getUserName())) {
+            throw new AlreadyExistsException("Username already exists");
+        }
+
+        // Check nếu fullName và saintName đã tồn tại
+        if (userRepository.existsByFullNameAndSaintName(dto.getFullName(), dto.getSaintName())) {
+            throw new AlreadyExistsException("Student already exists");
+        }
+
         User user = userMapper.toUserEntity(dto);
         user.setPassword(passwordEncoder.encode(user.getPassword())); // encode
         userRepository.save(user);
@@ -45,9 +52,20 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserRequestDto updateUser(Long id, UserRequestDto dto) {
-        return null;
+    public UserResponseDto updateUser(Long id, UserRequestDto dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // update information from dto
+        userMapper.updateEntity(user, dto);
+
+        // save to db
+        User updatedUser = userRepository.save(user);
+
+        // return to responsedto
+        return userMapper.toUserResponseDto(updatedUser);
     }
+
 
     @Override
     public UserResponseDto convertUserToDto(User user) {

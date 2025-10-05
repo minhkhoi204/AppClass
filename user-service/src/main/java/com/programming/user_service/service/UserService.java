@@ -9,7 +9,7 @@ public interface UserService {
     UserResponseDto getUserById(Long id);
     boolean userExists(Long id);
 
-    UserRequestDto updateUser(Long id, UserRequestDto dto);
+    UserResponseDto updateUser(Long id, UserRequestDto dto);
     UserResponseDto convertUserToDto(User user);
 
 

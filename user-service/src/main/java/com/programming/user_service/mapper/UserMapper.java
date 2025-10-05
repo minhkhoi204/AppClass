@@ -27,8 +27,9 @@ public class UserMapper {
 
     public void updateEntity(User user, UserRequestDto dto) {
         user.setUserName(dto.getUserName());
-        user.setFullName(dto.getFullName());
         user.setSaintName(dto.getSaintName());
-        // handle password later
+        user.setFullName(dto.getFullName());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
     }
 }
