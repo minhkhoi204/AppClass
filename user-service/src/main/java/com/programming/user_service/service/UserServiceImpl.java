@@ -66,9 +66,16 @@ public class UserServiceImpl implements UserService{
         return userMapper.toUserResponseDto(updatedUser);
     }
 
-
     @Override
     public UserResponseDto convertUserToDto(User user) {
         return userMapper.toUserResponseDto(user);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("User not found with id: " + id);
+        }
+        userRepository.deleteById(id);
     }
 }

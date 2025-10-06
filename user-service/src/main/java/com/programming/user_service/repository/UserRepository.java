@@ -12,7 +12,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByFullNameAndSaintName(String fullName, String saintName);
 
 
-
-    @Override
     boolean existsById(Long id);
 }

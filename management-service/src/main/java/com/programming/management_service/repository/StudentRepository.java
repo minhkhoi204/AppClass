@@ -14,6 +14,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findAllByClassroomId(Long classroomId);
 
     boolean existsByUserId(Long userId); // createStudent
+    boolean existsByFullNameAndSaintName(String fullName, String saintName);
 
     List<Student> findByFullNameIgnoreCase(String fullName);
 

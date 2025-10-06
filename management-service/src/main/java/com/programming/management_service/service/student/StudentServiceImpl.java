@@ -28,6 +28,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDto createStudent(StudentDto dto) {
+        // check logic later (significant)
         if (dto.getUserId() != null) {
             Boolean exists = userClient.userExists(dto.getUserId()); // gọi sang user-service
             if (!Boolean.TRUE.equals(exists)) {
@@ -37,6 +38,10 @@ public class StudentServiceImpl implements StudentService {
             if (studentRepository.findByUserId(dto.getUserId()).isPresent()) {
                 throw new AlreadyExistsException("Student already exists for userId " + dto.getUserId());
             }
+        }
+
+        if(studentRepository.existsByFullNameAndSaintName(dto.getFullName(), dto.getSaintName())) {
+            throw new AlreadyExistsException("Student " + dto.getSaintName() + " " + dto.getFullName() + " already exists");
         }
 
         Student student = studentMapper.toStudentEntity(dto); // convert DTO → Entity
