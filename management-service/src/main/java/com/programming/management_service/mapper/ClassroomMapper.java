@@ -13,20 +13,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ClassroomMapper {
 
-    private final StudentMapper studentMapper;
 
     public ClassroomDto toClassroomDto(Classroom classroom) {
         if (classroom == null) return null;
         ClassroomDto dto = new ClassroomDto();
         dto.setId(classroom.getId());
         dto.setName(classroom.getName());
-        if (classroom.getStudents() != null) {
-            List<StudentDto> students = classroom.getStudents()
-                    .stream()
-                    .map(studentMapper::toStudentDto)
-                    .collect(Collectors.toList());
-            dto.setStudents(students);
-        }
         return dto;
     }
 

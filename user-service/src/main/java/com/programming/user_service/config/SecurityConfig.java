@@ -1,6 +1,5 @@
 package com.programming.user_service.config;
 
-import com.programming.user_service.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

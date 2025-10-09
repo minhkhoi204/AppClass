@@ -9,5 +9,4 @@ public class ClassroomDto {
     private Long id;
     private String name;
     private List<StudentDto> students;
-    private List<CatechistDto> catechists;
 }

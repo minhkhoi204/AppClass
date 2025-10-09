@@ -4,11 +4,8 @@ import com.programming.management_service.dto.ClassroomDto;
 import com.programming.management_service.dto.StudentDto;
 import com.programming.management_service.exception.AlreadyExistsException;
 import com.programming.management_service.exception.ResourceNotFoundException;
-import com.programming.management_service.mapper.StudentMapper;
 import com.programming.management_service.model.Classroom;
-import com.programming.management_service.model.Student;
 import com.programming.management_service.repository.ClassroomRepository;
-import com.programming.management_service.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +18,7 @@ import java.util.Optional;
 public class ClassroomServiceImpl implements ClassroomService {
 
     private final ClassroomRepository classroomRepository;
-    private final StudentRepository studentRepository;
-    private final StudentMapper studentMapper;
+
 
     @Override
     public Classroom createClassroom(Classroom classroom) {
@@ -70,15 +66,13 @@ public class ClassroomServiceImpl implements ClassroomService {
         dto.setName(classroom.getName());
 
         // Lấy danh sách student từ repository
-        List<Student> students = studentRepository.findAllByClassroomId(id);
-        List<StudentDto> studentDtos = students.stream()
-                .map(studentMapper::toStudentDto)
-                .toList(); // Java 16+ hoặc dùng collect(Collectors.toList()) nếu Java < 16
+//        List<Student> students = studentRepository.findAllByClassroomId(id);
+//        List<StudentDto> studentDtos = students.stream()
+//                .map(studentMapper::toStudentDto)
+//                .toList(); // Java 16+ hoặc dùng collect(Collectors.toList()) nếu Java < 16
 
-        dto.setStudents(studentDtos);
+//        dto.setStudents(studentDtos);
 
-        // Nếu chưa có Catechist, tạm set danh sách rỗng
-        dto.setCatechists(Collections.emptyList());
 
         return dto;
     }

@@ -1,8 +1,8 @@
 package com.programming.user_service.mapper;
 
-import com.programming.user_service.dto.UserRequestDto;
-import com.programming.user_service.dto.UserResponseDto;
-import com.programming.user_service.model.User;
+import com.programming.user_service.domain.dto.request.UserRequestDto;
+import com.programming.user_service.domain.dto.response.UserResponseDto;
+import com.programming.user_service.domain.model.User;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,6 +22,7 @@ public class UserMapper {
         user.setPassword(dto.getPassword());
         user.setFullName(dto.getFullName());
         user.setSaintName(dto.getSaintName());
+        user.setDateOfBirth(dto.getDateOfBirth());
         return user;
     }
 

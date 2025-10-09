@@ -1,9 +1,9 @@
 package com.programming.user_service.controller;
 
-import com.programming.user_service.dto.UserRequestDto;
-import com.programming.user_service.dto.UserResponseDto;
+import com.programming.user_service.domain.dto.request.UserRequestDto;
+import com.programming.user_service.domain.dto.response.UserResponseDto;
 import com.programming.user_service.response.ApiResponse;
-import com.programming.user_service.service.UserService;
+import com.programming.user_service.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

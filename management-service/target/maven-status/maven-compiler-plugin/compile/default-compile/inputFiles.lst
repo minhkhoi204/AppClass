@@ -1,8 +1,4 @@
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\constant\CatechistType.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\constant\ExecutivePosition.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\controller\ClassroomController.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\controller\ExecutiveController.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\controller\StudentController.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\dto\ClassroomDto.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\dto\LecturerDto.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\dto\StudentDto.java
@@ -13,18 +9,8 @@ D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\progra
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\management_caller\UserClient.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\ManagementServiceApplication.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\mapper\ClassroomMapper.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\mapper\StudentMapper.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\model\Catechist.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\model\Classroom.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\model\Executive.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\model\Student.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\repository\ClassroomRepository.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\repository\ExecutiveRepository.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\repository\StudentRepository.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\response\ApiResponse.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\service\classroom\ClassroomService.java
 D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\service\classroom\ClassroomServiceImpl.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\service\executive\ExecutiveService.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\service\executive\ExecutiveServiceImpl.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\service\student\StudentService.java
-D:\study\Code\test\AppClass-back-end\management-service\src\main\java\com\programming\management_service\service\student\StudentServiceImpl.java

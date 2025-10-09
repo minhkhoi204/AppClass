@@ -18,7 +18,8 @@ public class Classroom {
 
     private String name;
 
-    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Student> students = new HashSet<>();
+//    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<Student> students = new HashSet<>();
 
+    private Long userId;
 }
