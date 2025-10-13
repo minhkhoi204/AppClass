@@ -1,8 +1,7 @@
 package com.programming.user_service.service.student;
 
-import com.programming.user_service.caller.ManagementClient;
-import com.programming.user_service.domain.dto.request.StudentRequestDto;
-import com.programming.user_service.domain.dto.response.StudentResponseDto;
+import com.programming.common_dto.student.StudentRequestDto;
+import com.programming.common_dto.student.StudentResponseDto;
 import com.programming.user_service.domain.enums.Role;
 import com.programming.user_service.exception.AlreadyExistsException;
 import com.programming.user_service.exception.ResourceNotFoundException;
@@ -13,14 +12,11 @@ import com.programming.user_service.repository.StudentRepository;
 
 import com.programming.user_service.repository.UserRepository;
 import com.programming.user_service.service.user.UserService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +60,14 @@ public class StudentServiceImpl implements StudentService {
 
         return studentMapper.toStudentResponseDto(student);
     }
+
+    @Override
+    public StudentResponseDto getStudentById(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found for id: " + studentId));
+
+        return studentMapper.toStudentResponseDto(student);
+    }
+
 
 }

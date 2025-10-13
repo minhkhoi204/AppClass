@@ -1,14 +1,12 @@
 package com.programming.user_service.service.student;
 
-import com.programming.user_service.domain.dto.request.UserRequestDto;
-import com.programming.user_service.domain.model.Student;
-import com.programming.user_service.domain.dto.request.StudentRequestDto;
-import com.programming.user_service.domain.dto.response.StudentResponseDto;
-
-import java.util.List;
+import com.programming.common_dto.student.StudentRequestDto;
+import com.programming.common_dto.student.StudentResponseDto;
 
 public interface StudentService {
     StudentResponseDto createStudent(StudentRequestDto studentDto);
+
+    StudentResponseDto getStudentById(Long studentId);
 
     //void addExistingStudentToClassroom(Long classroomId, Long studentId);
 

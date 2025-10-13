@@ -1,4 +1,4 @@
-package com.programming.user_service.domain.dto.response;
+package com.programming.common_dto.student;
 
 import lombok.*;
 

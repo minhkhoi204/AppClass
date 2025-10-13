@@ -1,16 +1,14 @@
 package com.programming.user_service.controller;
 
-import com.programming.user_service.domain.dto.response.StudentResponseDto;
-import com.programming.user_service.domain.dto.request.StudentRequestDto;
-import com.programming.user_service.domain.model.Student;
+import com.programming.common_dto.student.StudentRequestDto;
+import com.programming.common_dto.student.StudentResponseDto;
+import com.programming.user_service.mapper.StudentMapper;
 import com.programming.user_service.response.ApiResponse;
 import com.programming.user_service.service.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -19,10 +17,32 @@ import java.util.List;
 public class StudentController {
 
     private final StudentService studentService;
+    private final StudentMapper studentMapper;
+
+//    @PostMapping("/create")
+//    public ResponseEntity<StudentResponseDto> createStudent(@RequestBody StudentRequestDto dto) {
+//        return ResponseEntity.status(HttpStatus.CREATED).body(studentService.createStudent(dto));
+//    }
 
     @PostMapping("/create")
-    public ResponseEntity<StudentResponseDto> createStudent(@RequestBody StudentRequestDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(studentService.createStudent(dto));
+    public ResponseEntity<ApiResponse> createStudent(@RequestBody StudentRequestDto dto) {
+        StudentResponseDto response = studentService.createStudent(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse("Student created successfully", response));
     }
+
+//    @GetMapping("/{id}")
+//    public ResponseEntity<StudentResponseDto> getStudentById(@PathVariable Long id) {
+//        StudentResponseDto student = studentService.getStudentById(id);
+//        return ResponseEntity.ok(student);
+//    }
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse> getStudentById(@PathVariable Long id) {
+        StudentResponseDto response = studentService.getStudentById(id);
+        return ResponseEntity.ok(new ApiResponse("Student retrieved successfully", response));
+    }
+
+
+
 
 }

@@ -30,17 +30,20 @@ public class UserServiceImpl implements UserService{
         }
 
         // Tạo username tự động
-        String generatedUsername = generateUsername(dto.getFullName(), dto.getDateOfBirth());
+        //String generatedUsername = generateUsername(dto.getFullName(), dto.getDateOfBirth());
 
         // Check username đã tồn tại
-        if (userRepository.existsByUserName(generatedUsername)) {
-            throw new AlreadyExistsException("Generated username already exists: " + generatedUsername);
+//        if (userRepository.existsByUserName(generatedUsername)) {
+//            throw new AlreadyExistsException("Generated username already exists: " + generatedUsername);
+//        }
+        if (userRepository.existsByUserName(dto.getUserName())) {
+            throw new AlreadyExistsException("Generated username already exists: " + dto.getUserName());
         }
 
         // Tạo user entity từ DTO
         User user = userMapper.toUserEntity(dto);
 
-        user.setUserName(generatedUsername);
+        //user.setUserName(generatedUsername);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         userRepository.save(user);
@@ -89,6 +92,9 @@ public class UserServiceImpl implements UserService{
 
         // update information from dto
         userMapper.updateEntity(user, dto);
+        if (userRepository.existsByUserName(dto.getUserName())) {
+            throw new AlreadyExistsException("Username already exists: " + dto.getUserName());
+        }
 
         // save to db
         User updatedUser = userRepository.save(user);
