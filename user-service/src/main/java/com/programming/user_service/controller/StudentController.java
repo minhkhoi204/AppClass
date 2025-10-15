@@ -41,8 +41,4 @@ public class StudentController {
         StudentResponseDto response = studentService.getStudentById(id);
         return ResponseEntity.ok(new ApiResponse("Student retrieved successfully", response));
     }
-
-
-
-
 }

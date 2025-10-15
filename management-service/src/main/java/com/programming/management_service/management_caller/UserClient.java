@@ -1,6 +1,6 @@
 package com.programming.management_service.management_caller;
 
-import com.programming.management_service.dto.UserDto;
+import com.programming.management_service.domain.dto.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

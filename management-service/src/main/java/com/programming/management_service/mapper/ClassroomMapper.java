@@ -1,33 +1,32 @@
 package com.programming.management_service.mapper;
 
+import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
+import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
-import com.programming.management_service.dto.ClassroomDto;
-import com.programming.management_service.dto.StudentDto;
-import com.programming.management_service.model.Classroom;
+import com.programming.management_service.domain.dto.ClassroomDto;
+import com.programming.management_service.domain.model.Classroom;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+
 
 @Component
 @RequiredArgsConstructor
 public class ClassroomMapper {
 
+    public Classroom toClassroomEntity(ClassroomRequestDto dto) {
+        Classroom c = new Classroom();
+        c.setName(dto.getName());
+        c.setStudentIds(dto.getStudentIds() != null ? new HashSet<>(dto.getStudentIds()) : new HashSet<>());
+        return c;
+    }
 
-    public ClassroomDto toClassroomDto(Classroom classroom) {
-        if (classroom == null) return null;
-        ClassroomDto dto = new ClassroomDto();
+    public ClassroomResponseDto toClassroomResponseDto(Classroom classroom) {
+        ClassroomResponseDto dto = new ClassroomResponseDto();
         dto.setId(classroom.getId());
         dto.setName(classroom.getName());
+        dto.setStudentIds(classroom.getStudentIds());
         return dto;
     }
 
-    public Classroom toClassroomEntity(ClassroomDto dto) {
-        if (dto == null) return null;
-        Classroom c = new Classroom();
-        c.setId(dto.getId());
-        c.setName(dto.getName());
-        // students handling: usually set elsewhere
-        return c;
-    }
 }
