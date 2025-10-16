@@ -2,6 +2,7 @@ package com.programming.user_service.controller;
 
 import com.programming.common_dto.student.StudentRequestDto;
 import com.programming.common_dto.student.StudentResponseDto;
+import com.programming.user_service.exception.ResourceNotFoundException;
 import com.programming.user_service.mapper.StudentMapper;
 import com.programming.user_service.response.ApiResponse;
 import com.programming.user_service.service.student.StudentService;
@@ -40,5 +41,15 @@ public class StudentController {
     public ResponseEntity<ApiResponse> getStudentById(@PathVariable Long id) {
         StudentResponseDto response = studentService.getStudentById(id);
         return ResponseEntity.ok(new ApiResponse("Student retrieved successfully", response));
+    }
+
+    @PostMapping("/create/{userId}")
+    public ResponseEntity<ApiResponse> createStudentWithUserId(
+            @RequestBody StudentRequestDto studentRequestDto,
+            @PathVariable Long userId) {
+
+        StudentResponseDto response = studentService.createStudentWithUserId(studentRequestDto, userId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse("Student created successfully", response));
     }
 }

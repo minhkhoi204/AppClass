@@ -8,6 +8,7 @@ public interface StudentService {
 
     StudentResponseDto getStudentById(Long studentId);
 
+    StudentResponseDto createStudentWithUserId(StudentRequestDto studentDto, Long userId);
     //void addExistingStudentToClassroom(Long classroomId, Long studentId);
 
 //    StudentResponseDto createStudentInClassroom(Long classroomId, StudentRequestDto studentDto);
