@@ -25,6 +25,9 @@ public interface StudentClient {
     @GetMapping("/users")
     List<StudentResponseDto> getStudentsByIds(@RequestParam("ids") Set<Long> ids);
 
+    @PutMapping("/api/students/{studentId}/classroom")
+    void updateStudentClassroom(@PathVariable("studentId") Long studentId,
+                                @RequestParam("classroomId") Long classroomId);
 }
 
 

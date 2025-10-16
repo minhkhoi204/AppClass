@@ -90,4 +90,37 @@ public class StudentServiceImpl implements StudentService {
         return studentMapper.toStudentResponseDto(student);
     }
 
+    @Override
+    public StudentResponseDto updateStudent(Long studentId, StudentRequestDto updatedStudentDto) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
+
+        // update Student
+        student.setFatherName(updatedStudentDto.getFatherName());
+        student.setMotherName(updatedStudentDto.getMotherName());
+        student.setFatherPhoneNum(updatedStudentDto.getFatherPhoneNum());
+        student.setMotherPhoneNum(updatedStudentDto.getMotherPhoneNum());
+        student.setAddress(updatedStudentDto.getAddress());
+
+        // update user in student
+        User user = student.getUser();
+        user.setFullName(updatedStudentDto.getFullName());
+        user.setSaintName(updatedStudentDto.getSaintName());
+        user.setDateOfBirth(updatedStudentDto.getDateOfBirth());
+
+        userRepository.save(user);
+
+        student = studentRepository.save(student);
+
+        return studentMapper.toStudentResponseDto(student);
+    }
+
+    @Override
+    public void updateStudentClassroom(Long studentId, Long classroomId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + studentId));
+
+        student.setClassroomId(classroomId);
+        studentRepository.save(student);
+    }
 }

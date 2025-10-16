@@ -14,12 +14,15 @@ import com.programming.management_service.repository.ClassroomRepository;
 import com.programming.management_service.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +78,13 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         classroom.getStudentIds().add(student.getId());
         classroomRepository.save(classroom);
+
+        //test
+        try {
+            studentClient.updateStudentClassroom(studentId, classroomId);
+        } catch (ResourceNotFoundException e) {
+            throw new RuntimeException("Failed to update student classroom: " + e.getMessage());
+        }
 
         return getClassroomById(classroomId);
     }

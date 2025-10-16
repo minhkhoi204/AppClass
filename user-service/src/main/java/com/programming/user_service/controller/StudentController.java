@@ -52,4 +52,18 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse("Student created successfully", response));
     }
+
+    @PutMapping("/{id}/update")
+    public ResponseEntity<ApiResponse> updateStudent(@PathVariable Long id, @RequestBody StudentRequestDto dto) {
+        StudentResponseDto response = studentService.updateStudent(id, dto);
+        return ResponseEntity.ok(new ApiResponse("Student updated successfully", response));
+    }
+
+    @PutMapping("/{studentId}/classroom")
+    public ResponseEntity<ApiResponse> updateClassroom(@PathVariable Long studentId,
+                                                       @RequestParam Long classroomId) {
+        studentService.updateStudentClassroom(studentId, classroomId);
+        return ResponseEntity.ok(new ApiResponse("Student classroom updated", null));
+    }
+
 }
