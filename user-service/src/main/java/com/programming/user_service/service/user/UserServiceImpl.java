@@ -90,11 +90,12 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        // update information from dto
-        userMapper.updateEntity(user, dto);
-        if (userRepository.existsByUserName(dto.getUserName())) {
+        if (!user.getUserName().equals(dto.getUserName()) &&
+                userRepository.existsByUserName(dto.getUserName())) {
             throw new AlreadyExistsException("Username already exists: " + dto.getUserName());
         }
+        // update information from dto
+        userMapper.updateEntity(user, dto);
 
         // save to db
         User updatedUser = userRepository.save(user);
