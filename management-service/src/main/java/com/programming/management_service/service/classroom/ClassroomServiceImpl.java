@@ -3,6 +3,7 @@ package com.programming.management_service.service.classroom;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.programming.common_dto.student.StudentResponseDto;
 import com.programming.management_service.domain.dto.ClassroomDto;
+import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import com.programming.management_service.exception.AlreadyExistsException;
 import com.programming.management_service.exception.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -76,4 +78,21 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         return getClassroomById(classroomId);
     }
+
+    @Override
+    public ClassroomResponseDto updateClassroom(Long id, ClassroomRequestDto requestDto) {
+        Classroom classroom = classroomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + id));
+
+        // cập nhật thông tin từ request
+        classroom.setName(requestDto.getName());
+        //classroom.setStudentIds(requestDto.getStudentIds() != null ? new HashSet<>(requestDto.getStudentIds()) : new HashSet<>());
+        if (requestDto.getStudentIds() != null) {
+            classroom.setStudentIds(new HashSet<>(requestDto.getStudentIds()));
+        }
+
+        Classroom updated = classroomRepository.save(classroom);
+        return classroomMapper.toClassroomResponseDto(updated);
+    }
+
 }

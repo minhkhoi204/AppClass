@@ -46,4 +46,12 @@ public class ClassroomController {
         ClassroomResponseDto classroom = classroomService.getClassroomById(classroomId);
         return ResponseEntity.ok(new ApiResponse("Success", classroom));
     }
+
+    @PutMapping("/{classroomId}/update")
+    public ResponseEntity<ApiResponse> updateClassroom(@PathVariable Long classroomId,
+                                                       @RequestBody ClassroomRequestDto classroomRequestDto) {
+        ClassroomResponseDto updated = classroomService.updateClassroom(classroomId, classroomRequestDto);
+        return ResponseEntity.ok(new ApiResponse("Classroom updated successfully", updated));
+    }
+
 }
