@@ -1,6 +1,7 @@
 package com.programming.management_service.service.classroom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.programming.common_dto.student.StudentRequestDto;
 import com.programming.common_dto.student.StudentResponseDto;
 import com.programming.management_service.domain.dto.ClassroomDto;
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
@@ -35,34 +36,37 @@ public class ClassroomServiceImpl implements ClassroomService {
 
 
     @Override
-    public Classroom createClassroom(Classroom classroom) {
-        return Optional.of(classroom)
-                .filter(c -> !classroomRepository.existsByName(c.getName())) // hoặc byCode, byId...
-                .map(classroomRepository::save)
-                .orElseThrow(() -> new AlreadyExistsException("Classroom: '" + classroom.getName() + "' already exists"));
+    public ClassroomResponseDto createClassroom(ClassroomRequestDto dto) {
+        if (classroomRepository.existsByName(dto.getName())) {
+            throw new AlreadyExistsException("Classroom: '" + dto.getName() + "' already exists");
+        }
+
+        Classroom classroom = classroomMapper.toClassroomEntity(dto);
+        Classroom saved = classroomRepository.save(classroom);
+        return classroomMapper.toClassroomResponseDto(saved);
     }
 
-    public ClassroomResponseDto getClassroomById(Long id) {
-        Classroom classroom = classroomRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + id));
-
-        ClassroomResponseDto dto = classroomMapper.toClassroomResponseDto(classroom);
-
-        // get list students
-        List<StudentResponseDto> students = classroom.getStudentIds().stream()
+    private List<StudentResponseDto> getStudentsInClassroom(Classroom classroom) {
+        return classroom.getStudentIds().stream()
                 .map(studentId -> {
                     ApiResponse response = studentClient.getStudentById(studentId);
                     return objectMapper.convertValue(response.getData(), StudentResponseDto.class);
                 })
                 .collect(Collectors.toList());
+    }
 
-        dto.setStudents(students);
+    @Override
+    public ClassroomResponseDto getClassroomById(Long id) {
+        Classroom classroom = classroomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + id));
+
+        ClassroomResponseDto dto = classroomMapper.toClassroomResponseDto(classroom);
+        dto.setStudents(getStudentsInClassroom(classroom));
         return dto;
     }
 
-
     @Override
-    public ClassroomResponseDto addStudentToClassroom(Long classroomId, Long studentId) {
+    public void addStudentToClassroom(Long classroomId, Long studentId) {
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
 
@@ -70,24 +74,40 @@ public class ClassroomServiceImpl implements ClassroomService {
             throw new AlreadyExistsException("Student with ID " + studentId + " is already in the classroom");
         }
 
-        // call user-service
+        // Validate student exists
         ApiResponse response = studentClient.getStudentById(studentId);
-
-        // Convert object -> StudentResponseDto
         StudentResponseDto student = objectMapper.convertValue(response.getData(), StudentResponseDto.class);
 
         classroom.getStudentIds().add(student.getId());
         classroomRepository.save(classroom);
 
-        //test
-        try {
-            studentClient.updateStudentClassroom(studentId, classroomId);
-        } catch (ResourceNotFoundException e) {
-            throw new RuntimeException("Failed to update student classroom: " + e.getMessage());
-        }
+        StudentRequestDto updatedStudentDto = new StudentRequestDto();
+        updatedStudentDto.setClassroomId(classroomId);
 
-        return getClassroomById(classroomId);
+        studentClient.updateStudent(studentId, updatedStudentDto);
     }
+
+
+//    @Override
+//    public ClassroomResponseDto addStudentToClassroom(Long classroomId, Long studentId) {
+//        Classroom classroom = classroomRepository.findById(classroomId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
+//
+//        if (classroom.getStudentIds().contains(studentId)) {
+//            throw new AlreadyExistsException("Student with ID " + studentId + " is already in the classroom");
+//        }
+//
+//        // call user-service
+//        ApiResponse response = studentClient.getStudentById(studentId);
+//
+//        // Convert object -> StudentResponseDto
+//        StudentResponseDto student = objectMapper.convertValue(response.getData(), StudentResponseDto.class);
+//
+//        classroom.getStudentIds().add(student.getId());
+//        classroomRepository.save(classroom);
+//
+//        return getClassroomById(classroomId);
+//    }
 
     @Override
     public ClassroomResponseDto updateClassroom(Long id, ClassroomRequestDto requestDto) {

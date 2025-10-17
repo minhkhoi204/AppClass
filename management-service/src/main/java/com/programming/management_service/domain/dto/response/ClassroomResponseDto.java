@@ -11,5 +11,5 @@ public class ClassroomResponseDto {
     private Long id;
     private String name;
     private Set<Long> studentIds;
-    private List<StudentResponseDto> students; // tuỳ chọn nếu bạn muốn include luôn student info từ user-service
+    private List<StudentResponseDto> students;
 }

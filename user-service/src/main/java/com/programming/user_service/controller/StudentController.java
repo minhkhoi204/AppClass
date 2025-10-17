@@ -59,11 +59,11 @@ public class StudentController {
         return ResponseEntity.ok(new ApiResponse("Student updated successfully", response));
     }
 
-    @PutMapping("/{studentId}/classroom")
-    public ResponseEntity<ApiResponse> updateClassroom(@PathVariable Long studentId,
-                                                       @RequestParam Long classroomId) {
-        studentService.updateStudentClassroom(studentId, classroomId);
-        return ResponseEntity.ok(new ApiResponse("Student classroom updated", null));
-    }
+//    @PutMapping("/{studentId}/classroom")
+//    public ResponseEntity<ApiResponse> updateClassroom(@PathVariable Long studentId,
+//                                                       @RequestParam Long classroomId) {
+//        studentService.updateStudentClassroom(studentId, classroomId);
+//        return ResponseEntity.ok(new ApiResponse("Student classroom updated", null));
+//    }
 
 }

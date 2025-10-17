@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class StudentRequestDto {
+    private Long classroomId;
 
     private String fullName;
     private String saintName;

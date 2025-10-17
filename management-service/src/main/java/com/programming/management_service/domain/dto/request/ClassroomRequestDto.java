@@ -7,5 +7,5 @@ import java.util.Set;
 @Data
 public class ClassroomRequestDto {
     private String name;
-    private Set<Long> studentIds; // dùng khi tạo hoặc update classroom
+    private Set<Long> studentIds;
 }

@@ -12,5 +12,5 @@ public interface StudentService {
 
     StudentResponseDto updateStudent(Long studentId, StudentRequestDto updatedStudentDto);
 
-    void updateStudentClassroom(Long studentId, Long classroomId);
+    //void updateStudentClassroom(Long studentId, Long classroomId);
 }
