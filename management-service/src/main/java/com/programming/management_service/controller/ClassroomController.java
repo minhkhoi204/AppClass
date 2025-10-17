@@ -26,10 +26,7 @@ public class ClassroomController {
     // Create class
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> createClassroom(@RequestBody ClassroomRequestDto classroomRequestDto) {
-        Classroom classroom = classroomMapper.toClassroomEntity(classroomRequestDto);
-        Classroom saved = classroomService.createClassroom(classroom);
-        ClassroomResponseDto responseDto = classroomMapper.toClassroomResponseDto(saved);
-
+        ClassroomResponseDto responseDto = classroomService.createClassroom(classroomRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse("Classroom created successfully", responseDto));
     }
@@ -37,9 +34,10 @@ public class ClassroomController {
     @PostMapping("/{classroomId}/add-student/{studentId}")
     public ResponseEntity<ApiResponse> addStudentToClassroom(@PathVariable Long classroomId,
                                                              @PathVariable Long studentId) {
-        ClassroomResponseDto updated = classroomService.addStudentToClassroom(classroomId, studentId);
-        return ResponseEntity.ok(new ApiResponse("Student added to classroom", updated));
+        classroomService.addStudentToClassroom(classroomId, studentId);
+        return ResponseEntity.ok(new ApiResponse("Student added to classroom successfully", null));
     }
+
 
     @GetMapping("/{classroomId}")
     public ResponseEntity<ApiResponse> getClassroomById(@PathVariable Long classroomId) {
