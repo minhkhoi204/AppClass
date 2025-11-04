@@ -1,7 +1,7 @@
 package com.programming.user_service.mapper;
 
-import com.programming.common_dto.student.StudentRequestDto;
-import com.programming.common_dto.student.StudentResponseDto;
+import com.programming.common.common_dto.student.StudentRequestDto;
+import com.programming.common.common_dto.student.StudentResponseDto;
 import com.programming.user_service.domain.model.Student;
 import com.programming.user_service.domain.model.User;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class StudentMapper {
                 .userId(student.getUser().getId())
                 .id(student.getId())
                 .fullName(student.getUser().getFullName())
-                .saintName(student.getUser().getSaintName())
+                .christianName(student.getUser().getChristianName())
                 .dateOfBirth(student.getUser().getDateOfBirth())
                 .fatherName(student.getFatherName())
                 .fatherPhoneNum(student.getFatherPhoneNum())

@@ -12,7 +12,7 @@ public class UserMapper {
         dto.setId(user.getId());
         dto.setUserName(user.getUserName());
         dto.setFullName(user.getFullName());
-        dto.setSaintName(user.getSaintName());
+        dto.setChristianName(user.getChristianName());
         return dto;
     }
 
@@ -21,14 +21,14 @@ public class UserMapper {
         user.setUserName(dto.getUserName());
         user.setPassword(dto.getPassword());
         user.setFullName(dto.getFullName());
-        user.setSaintName(dto.getSaintName());
+        user.setChristianName(dto.getChristianName());
         user.setDateOfBirth(dto.getDateOfBirth());
         return user;
     }
 
     public void updateEntity(User user, UserRequestDto dto) {
         user.setUserName(dto.getUserName());
-        user.setSaintName(dto.getSaintName());
+        user.setChristianName(dto.getChristianName());
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());

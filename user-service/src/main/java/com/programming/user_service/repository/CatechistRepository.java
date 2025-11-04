@@ -1,14 +1,11 @@
 package com.programming.user_service.repository;
 
-import com.programming.user_service.domain.model.Student;
+import com.programming.user_service.domain.model.Catechist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
-public interface StudentRepository extends JpaRepository<Student, Long> {
+public interface CatechistRepository extends JpaRepository<Catechist, Long> {
     boolean existsByUserFullNameAndUserChristianName(String fullName, String christianName);
     boolean existsByUserId(Long userId);
 

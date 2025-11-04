@@ -1,10 +1,9 @@
 package com.programming.user_service.controller;
 
-import com.programming.common_dto.student.StudentRequestDto;
-import com.programming.common_dto.student.StudentResponseDto;
-import com.programming.user_service.exception.ResourceNotFoundException;
+import com.programming.common.common_dto.student.StudentRequestDto;
+import com.programming.common.common_dto.student.StudentResponseDto;
 import com.programming.user_service.mapper.StudentMapper;
-import com.programming.user_service.response.ApiResponse;
+import com.programming.common.response.ApiResponse;
 import com.programming.user_service.service.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,10 +42,10 @@ public class StudentController {
         return ResponseEntity.ok(new ApiResponse("Student retrieved successfully", response));
     }
 
-    @PostMapping("/create/{userId}")
+    @PostMapping("/create-with-user")
     public ResponseEntity<ApiResponse> createStudentWithUserId(
             @RequestBody StudentRequestDto studentRequestDto,
-            @PathVariable Long userId) {
+            @RequestParam Long userId) {
 
         StudentResponseDto response = studentService.createStudentWithUserId(studentRequestDto, userId);
         return ResponseEntity.status(HttpStatus.CREATED)

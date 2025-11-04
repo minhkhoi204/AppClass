@@ -16,8 +16,8 @@ public class UserRequestDto {
     //@NotBlank(message = "Full name is required")
     private String fullName;
 
-    //@NotBlank(message = "Saint name is required")
-    private String saintName;
+    //@NotBlank(message = "Christian name is required")
+    private String christianName;
 
     //@NotNull(message = "Date of birth is required")
     private LocalDate dateOfBirth;

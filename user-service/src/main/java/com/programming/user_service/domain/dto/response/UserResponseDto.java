@@ -7,5 +7,5 @@ public class UserResponseDto {
     private Long id;
     private String userName;
     private String fullName;
-    private String saintName;
+    private String christianName;
 }

@@ -1,7 +1,7 @@
 package com.programming.user_service.service.student;
 
-import com.programming.common_dto.student.StudentRequestDto;
-import com.programming.common_dto.student.StudentResponseDto;
+import com.programming.common.common_dto.student.StudentRequestDto;
+import com.programming.common.common_dto.student.StudentResponseDto;
 
 public interface StudentService {
     StudentResponseDto createStudent(StudentRequestDto studentDto);

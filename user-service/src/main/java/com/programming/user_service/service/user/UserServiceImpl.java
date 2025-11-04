@@ -2,8 +2,8 @@ package com.programming.user_service.service.user;
 
 import com.programming.user_service.domain.dto.request.UserRequestDto;
 import com.programming.user_service.domain.dto.response.UserResponseDto;
-import com.programming.user_service.exception.AlreadyExistsException;
-import com.programming.user_service.exception.ResourceNotFoundException;
+import com.programming.common.exception.AlreadyExistsException;
+import com.programming.common.exception.ResourceNotFoundException;
 import com.programming.user_service.mapper.UserMapper;
 import com.programming.user_service.domain.model.User;
 import com.programming.user_service.repository.UserRepository;
@@ -25,14 +25,14 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserResponseDto createUser(UserRequestDto dto) {
         // Check nếu fullName và saintName đã tồn tại
-        if (userRepository.existsByFullNameAndSaintName(dto.getFullName(), dto.getSaintName())) {
-            throw new AlreadyExistsException("Student already exists");
+        if (userRepository.existsByFullNameAndChristianName(dto.getFullName(), dto.getChristianName())) {
+            throw new AlreadyExistsException("User already exists");
         }
 
-        // Tạo username tự động
+        // create username automatically
         //String generatedUsername = generateUsername(dto.getFullName(), dto.getDateOfBirth());
 
-        // Check username đã tồn tại
+        // Check username exists
 //        if (userRepository.existsByUserName(generatedUsername)) {
 //            throw new AlreadyExistsException("Generated username already exists: " + generatedUsername);
 //        }
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService{
             throw new AlreadyExistsException("Generated username already exists: " + dto.getUserName());
         }
 
-        // Tạo user entity từ DTO
+        // create user entity from dto
         User user = userMapper.toUserEntity(dto);
 
         //user.setUserName(generatedUsername);
