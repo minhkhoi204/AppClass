@@ -1,4 +1,4 @@
-package com.programming.common_dto.student;
+package com.programming.common.common_dto.student;
 
 import lombok.*;
 

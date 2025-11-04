@@ -1,11 +1,12 @@
 package com.programming.management_service.controller;
 
-import com.programming.management_service.domain.dto.ClassroomDto;
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import com.programming.management_service.mapper.ClassroomMapper;
-import com.programming.management_service.response.ApiResponse;
+
+import com.programming.common.response.ApiResponse;
 import com.programming.management_service.domain.model.Classroom;
+
 import com.programming.management_service.service.classroom.ClassroomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

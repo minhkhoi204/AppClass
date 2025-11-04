@@ -23,7 +23,7 @@ public class Catechist {
     private Role role; 
     
     @Column(name = "promise_date")
-    private LocalDate promiseDate; // Ngày tuyên hứa (null = chưa tuyên hứa/Dự Trưởng)
+    private LocalDate promiseDate;
     
     private Boolean isExecutiveBoard; // check if catechist is in executive board
 

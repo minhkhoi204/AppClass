@@ -1,8 +1,8 @@
-package com.programming.user_service.handler;
+package com.programming.common.handler;
 
-import com.programming.user_service.exception.AlreadyExistsException;
-import com.programming.user_service.exception.ResourceNotFoundException;
-import com.programming.user_service.response.ApiResponse;
+import com.programming.common.exception.AlreadyExistsException;
+import com.programming.common.exception.ResourceNotFoundException;
+import com.programming.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

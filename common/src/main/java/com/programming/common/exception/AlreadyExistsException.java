@@ -1,4 +1,4 @@
-package com.programming.user_service.exception;
+package com.programming.common.exception;
 
 public class AlreadyExistsException extends RuntimeException {
     public AlreadyExistsException(String message) {

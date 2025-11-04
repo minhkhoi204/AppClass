@@ -1,18 +1,20 @@
 package com.programming.management_service.service.classroom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.programming.common_dto.student.StudentRequestDto;
-import com.programming.common_dto.student.StudentResponseDto;
-import com.programming.management_service.domain.dto.ClassroomDto;
+import com.programming.common.common_dto.student.StudentRequestDto;
+import com.programming.common.common_dto.student.StudentResponseDto;
+
+import com.programming.common.exception.AlreadyExistsException;
+import com.programming.common.exception.ResourceNotFoundException;
+import com.programming.common.response.ApiResponse;
+
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
-import com.programming.management_service.exception.AlreadyExistsException;
-import com.programming.management_service.exception.ResourceNotFoundException;
 import com.programming.management_service.domain.model.Classroom;
 import com.programming.management_service.management_caller.StudentClient;
 import com.programming.management_service.mapper.ClassroomMapper;
 import com.programming.management_service.repository.ClassroomRepository;
-import com.programming.management_service.response.ApiResponse;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
@@ -114,7 +116,7 @@ public class ClassroomServiceImpl implements ClassroomService {
         Classroom classroom = classroomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + id));
 
-        // cập nhật thông tin từ request
+        // update info from request
         classroom.setName(requestDto.getName());
         //classroom.setStudentIds(requestDto.getStudentIds() != null ? new HashSet<>(requestDto.getStudentIds()) : new HashSet<>());
         if (requestDto.getStudentIds() != null) {

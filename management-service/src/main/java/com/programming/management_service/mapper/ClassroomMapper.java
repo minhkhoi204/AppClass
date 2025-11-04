@@ -4,7 +4,6 @@ import com.programming.management_service.domain.dto.request.ClassroomRequestDto
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
-import com.programming.management_service.domain.dto.ClassroomDto;
 import com.programming.management_service.domain.model.Classroom;
 
 import java.util.HashSet;

@@ -1,8 +1,10 @@
 package com.programming.management_service.management_caller;
 
-import com.programming.common_dto.student.StudentRequestDto;
-import com.programming.common_dto.student.StudentResponseDto;
-import com.programming.management_service.response.ApiResponse;
+import com.programming.common.common_dto.student.StudentRequestDto;
+import com.programming.common.common_dto.student.StudentResponseDto;
+
+import com.programming.common.response.ApiResponse;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
