@@ -51,8 +51,9 @@ public class CatechistServiceImpl implements CatechistService {
             throw new IllegalArgumentException("Invalid role for catechist: " + dto.getRole());
         }
 
-        // Validate promiseDate theo role
-        validatePromiseDateWithRole(dto.getRole(), dto.getPromiseDate(), dto.getDateOfBirth());
+        // Validate promise dates with role
+        validatePromiseDatesWithRole(dto.getRole(), dto.getAssistantCatechistPromiseDate(), 
+                                     dto.getCatechistPromiseDate(), dto.getDateOfBirth());
 
         // create User
         User user = new User();
@@ -107,8 +108,9 @@ public class CatechistServiceImpl implements CatechistService {
             throw new IllegalArgumentException("Invalid role for catechist: " + dto.getRole());
         }
 
-        // Validate promiseDate theo role
-        validatePromiseDateWithRole(dto.getRole(), dto.getPromiseDate(), user.getDateOfBirth());
+        // Validate promise dates with role
+        validatePromiseDatesWithRole(dto.getRole(), dto.getAssistantCatechistPromiseDate(), 
+                                     dto.getCatechistPromiseDate(), user.getDateOfBirth());
 
         // create Catechist
         Catechist catechist = CatechistMapper.toCatechistEntity(dto);
@@ -138,12 +140,15 @@ public class CatechistServiceImpl implements CatechistService {
             throw new IllegalArgumentException("Invalid role for catechist: " + requestDto.getRole());
         }
 
-        // Determine final role and promiseDate for validation
+        // Determine final values for validation (merge request with existing data)
         Role finalRole = requestDto.getRole() != null ? requestDto.getRole() : catechist.getRole();
-        LocalDate finalPromiseDate = requestDto.getPromiseDate() != null ? requestDto.getPromiseDate() : catechist.getPromiseDate();
+        LocalDate finalAssistantDate = requestDto.getAssistantCatechistPromiseDate() != null ? 
+                requestDto.getAssistantCatechistPromiseDate() : catechist.getAssistantCatechistPromiseDate();
+        LocalDate finalCatechistDate = requestDto.getCatechistPromiseDate() != null ? 
+                requestDto.getCatechistPromiseDate() : catechist.getCatechistPromiseDate();
         
-        // Validate promiseDate với role
-        validatePromiseDateWithRole(finalRole, finalPromiseDate, user.getDateOfBirth());
+        // Validate promise dates with role (this ensures data integrity)
+        validatePromiseDatesWithRole(finalRole, finalAssistantDate, finalCatechistDate, user.getDateOfBirth());
 
         // update catechist
         if (requestDto.getRole() != null) {
@@ -154,52 +159,18 @@ public class CatechistServiceImpl implements CatechistService {
             user.setRole(requestDto.getRole());
         }
         
-        if (requestDto.getPromiseDate() != null) {
-            catechist.setPromiseDate(requestDto.getPromiseDate());
+        if (requestDto.getAssistantCatechistPromiseDate() != null) {
+            catechist.setAssistantCatechistPromiseDate(requestDto.getAssistantCatechistPromiseDate());
+        }
+        
+        if (requestDto.getCatechistPromiseDate() != null) {
+            catechist.setCatechistPromiseDate(requestDto.getCatechistPromiseDate());
         }
         
         if (requestDto.getNote() != null) {
             catechist.setNote(requestDto.getNote());
         }
 
-        catechistRepository.save(catechist);
-        userRepository.save(user);
-
-        return CatechistMapper.toCatechistDto(catechist);
-    }
-
-    @Override
-    public CatechistResponseDto promiseCatechist(Long catechistId, LocalDate promiseDate) {
-        // Tìm catechist
-        Catechist catechist = catechistRepository.findById(catechistId)
-                .orElseThrow(() -> new ResourceNotFoundException("Catechist not found with id: " + catechistId));
-
-        // Kiểm tra catechist hiện tại phải là DU_TRUONG
-        if (catechist.getRole() != Role.DU_TRUONG) {
-            throw new IllegalStateException("Chỉ Dự Trưởng mới có thể tuyên hứa. Role hiện tại: " + catechist.getRole());
-        }
-
-        // Kiểm tra chưa có promiseDate
-        if (catechist.getPromiseDate() != null) {
-            throw new IllegalStateException("Catechist này đã tuyên hứa vào ngày: " + catechist.getPromiseDate());
-        }
-
-        // Validate promiseDate
-        if (promiseDate == null) {
-            throw new IllegalArgumentException("Ngày tuyên hứa không được để trống");
-        }
-        
-        // Validate promiseDate với role HUYNH_TRUONG
-        validatePromiseDateWithRole(Role.HUYNH_TRUONG, promiseDate, catechist.getUser().getDateOfBirth());
-
-        // Cập nhật promiseDate và chuyển role
-        catechist.setPromiseDate(promiseDate);
-        catechist.setRole(Role.HUYNH_TRUONG);
-        
-        // Cập nhật role của user
-        User user = catechist.getUser();
-        user.setRole(Role.HUYNH_TRUONG);
-        
         catechistRepository.save(catechist);
         userRepository.save(user);
 
@@ -224,45 +195,68 @@ public class CatechistServiceImpl implements CatechistService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Validate promiseDate với role
-     * Rules:
-     * 1. DU_TRUONG không được có promiseDate (chưa tuyên hứa)
-     * 2. Các role khác (HUYNH_TRUONG, DOAN_TRUONG, ...) BẮT BUỘC phải có promiseDate
-     * 3. promiseDate không được là tương lai
-     * 4. promiseDate phải sau khi đủ 16 tuổi
-     */
-    private void validatePromiseDateWithRole(Role role, LocalDate promiseDate, LocalDate dateOfBirth) {
-        // Rule 1: DU_TRUONG không được có promiseDate
+
+    private void validatePromiseDatesWithRole(Role role, LocalDate assistantPromiseDate, 
+                                              LocalDate catechistPromiseDate, LocalDate dateOfBirth) {
+        // Rule 1: DU_TRUONG validation
         if (role == Role.DU_TRUONG) {
-            if (promiseDate != null) {
+            // assistantCatechistPromiseDate is optional for DU_TRUONG
+            // catechistPromiseDate MUST be null for DU_TRUONG
+            if (catechistPromiseDate != null) {
                 throw new IllegalArgumentException(
-                    "Dự Trưởng không thể có ngày tuyên hứa. Nếu đã tuyên hứa, role phải là HUYNH_TRUONG hoặc cao hơn."
+                    "Assistant Catechist (DU_TRUONG) cannot have catechistPromiseDate. " +
+                    "Use role HUYNH_TRUONG if already promoted."
                 );
             }
-            return; // Valid DU_TRUONG
+            
+            // If assistantPromiseDate is provided, validate it
+            if (assistantPromiseDate != null) {
+                validatePromiseDate(assistantPromiseDate, dateOfBirth, "assistantCatechistPromiseDate");
+            }
+            return;
         }
 
-        // Rule 2: Các role khác BẮT BUỘC phải có promiseDate
-        if (promiseDate == null) {
+        // Rule 2: HUYNH_TRUONG and executive board roles validation
+        // MUST have both promise dates
+        if (assistantPromiseDate == null) {
             throw new IllegalArgumentException(
-                "Role " + role + " yêu cầu phải có ngày tuyên hứa. Nếu chưa tuyên hứa, hãy sử dụng role DU_TRUONG."
+                "Role " + role + " requires assistantCatechistPromiseDate. " +
+                "Must be DU_TRUONG first before becoming HUYNH_TRUONG."
+            );
+        }
+        
+        if (catechistPromiseDate == null) {
+            throw new IllegalArgumentException(
+                "Role " + role + " requires catechistPromiseDate. " +
+                "Use role DU_TRUONG if not yet promoted."
             );
         }
 
-        // Rule 3: promiseDate không được là tương lai
+        // Rule 3: Validate both dates
+        validatePromiseDate(assistantPromiseDate, dateOfBirth, "assistantCatechistPromiseDate");
+        validatePromiseDate(catechistPromiseDate, dateOfBirth, "catechistPromiseDate");
+
+        // Rule 4: catechistPromiseDate must be after assistantCatechistPromiseDate
+        if (catechistPromiseDate.isBefore(assistantPromiseDate)) {
+            throw new IllegalArgumentException(
+                "catechistPromiseDate must be after assistantCatechistPromiseDate. " +
+                "Assistant promise: " + assistantPromiseDate + ", Catechist promise: " + catechistPromiseDate
+            );
+        }
+    }
+
+    private void validatePromiseDate(LocalDate promiseDate, LocalDate dateOfBirth, String fieldName) {
+        // Cannot be in the future
         if (promiseDate.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException(
-                "Ngày tuyên hứa không thể là ngày trong tương lai."
-            );
+            throw new IllegalArgumentException(fieldName + " cannot be in the future");
         }
 
-        // Rule 4: promiseDate phải sau khi đủ 16 tuổi
+        // Must be at least 16 years old
         if (dateOfBirth != null) {
             LocalDate minPromiseDate = dateOfBirth.plusYears(16);
             if (promiseDate.isBefore(minPromiseDate)) {
                 throw new IllegalArgumentException(
-                    "Ngày tuyên hứa phải sau khi đủ 16 tuổi. Ngày tuyên hứa sớm nhất: " + minPromiseDate
+                    fieldName + " must be after turning 16 years old. Minimum date: " + minPromiseDate
                 );
             }
         }

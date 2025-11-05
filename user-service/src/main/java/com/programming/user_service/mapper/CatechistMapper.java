@@ -9,7 +9,8 @@ public class CatechistMapper {
         Catechist catechist = new Catechist();
 
         catechist.setRole(dto.getRole());
-        catechist.setPromiseDate(dto.getPromiseDate());
+        catechist.setAssistantCatechistPromiseDate(dto.getAssistantCatechistPromiseDate());
+        catechist.setCatechistPromiseDate(dto.getCatechistPromiseDate());
         catechist.setIsExecutiveBoard(dto.getIsExecutiveBoard());
         catechist.setNote(dto.getNote());
         return catechist;
@@ -27,7 +28,8 @@ public class CatechistMapper {
                 .dateOfBirth(catechist.getUser().getDateOfBirth())
 
                 .role(catechist.getRole())
-                .promiseDate(catechist.getPromiseDate())
+                .assistantCatechistPromiseDate(catechist.getAssistantCatechistPromiseDate())
+                .catechistPromiseDate(catechist.getCatechistPromiseDate())
                 .isExecutiveBoard(catechist.getIsExecutiveBoard())
                 .note(catechist.getNote())
                 .build();

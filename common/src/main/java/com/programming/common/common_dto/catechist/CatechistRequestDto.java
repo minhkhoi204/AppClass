@@ -18,7 +18,8 @@ public class CatechistRequestDto {
     private LocalDate dateOfBirth;
 
     private Role role;
-    private LocalDate promiseDate;
+    private LocalDate assistantCatechistPromiseDate; // Promise date for DU_TRUONG (Assistant Catechist)
+    private LocalDate catechistPromiseDate; // Promise date for HUYNH_TRUONG (Catechist)
     private Boolean isExecutiveBoard;
     private String note;
 }

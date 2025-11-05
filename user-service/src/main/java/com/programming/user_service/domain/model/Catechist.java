@@ -22,16 +22,23 @@ public class Catechist {
     @Enumerated(EnumType.STRING)
     private Role role; 
     
-    @Column(name = "promise_date")
-    private LocalDate promiseDate;
+    @Column(name = "assistant_catechist_promise_date")
+    private LocalDate assistantCatechistPromiseDate; // Promise date for DU_TRUONG (Assistant Catechist)
+    
+    @Column(name = "catechist_promise_date")
+    private LocalDate catechistPromiseDate; // Promise date for HUYNH_TRUONG (Catechist)
     
     private Boolean isExecutiveBoard; // check if catechist is in executive board
 
     private String note;
     
     // Helper methods
-    public boolean hasPromised() {
-        return promiseDate != null;
+    public boolean hasAssistantCatechistPromised() {
+        return assistantCatechistPromiseDate != null;
+    }
+    
+    public boolean hasCatechistPromised() {
+        return catechistPromiseDate != null;
     }
     
     public boolean isDuTruong() {

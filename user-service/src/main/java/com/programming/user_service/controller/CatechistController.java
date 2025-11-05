@@ -41,14 +41,6 @@ public class CatechistController {
         return ResponseEntity.ok(new ApiResponse("Catechist updated successfully", response));
     }
 
-    @PostMapping("/{id}/promise")
-    public ResponseEntity<ApiResponse> promiseCatechist(
-            @PathVariable Long id,
-            @RequestParam String promiseDate) {
-        CatechistResponseDto response = catechistService.promiseCatechist(id, java.time.LocalDate.parse(promiseDate));
-        return ResponseEntity.ok(new ApiResponse("Catechist promised successfully", response));
-    }
-
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<Void> deleteCatechist(@PathVariable Long id) {
         catechistService.deleteCatechist(id);
