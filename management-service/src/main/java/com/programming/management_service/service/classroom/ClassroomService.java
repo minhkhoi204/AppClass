@@ -14,10 +14,11 @@ public interface ClassroomService {
     ClassroomResponseDto updateClassroom(Long id, ClassroomRequestDto requestDto);
 
     void addStudentToClassroom(Long classroomId, Long studentId);
-
-//    List<Classroom> getAllClassrooms();
-//    void deleteClassroom(Long id);
-//    ClassroomDto getClassroomWithDetails(Long id);
-//    ClassroomResponseDto addStudentToClassroom(Long classroomId, Long studentId);
+    
+    void removeStudentFromClassroom(Long classroomId, Long studentId);
+    
+    void addCatechistToClassroom(Long classroomId, Long catechistId);
+    
+    void removeCatechistFromClassroom(Long classroomId, Long catechistId);
 
 }

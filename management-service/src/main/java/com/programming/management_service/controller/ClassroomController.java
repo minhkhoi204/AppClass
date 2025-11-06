@@ -32,13 +32,33 @@ public class ClassroomController {
                 .body(new ApiResponse("Classroom created successfully", responseDto));
     }
 
-    @PostMapping("/{classroomId}/add-student/{studentId}")
+    @PostMapping("/{classroomId}/students/{studentId}/add")
     public ResponseEntity<ApiResponse> addStudentToClassroom(@PathVariable Long classroomId,
                                                              @PathVariable Long studentId) {
         classroomService.addStudentToClassroom(classroomId, studentId);
         return ResponseEntity.ok(new ApiResponse("Student added to classroom successfully", null));
     }
 
+    @DeleteMapping("/{classroomId}/students/{studentId}/remove")
+    public ResponseEntity<ApiResponse> removeStudentFromClassroom(@PathVariable Long classroomId,
+                                                                  @PathVariable Long studentId) {
+        classroomService.removeStudentFromClassroom(classroomId, studentId);
+        return ResponseEntity.ok(new ApiResponse("Student removed from classroom successfully", null));
+    }
+
+    @PostMapping("/{classroomId}/catechists/{catechistId}/add")
+    public ResponseEntity<ApiResponse> addCatechistToClassroom(@PathVariable Long classroomId,
+                                                               @PathVariable Long catechistId) {
+        classroomService.addCatechistToClassroom(classroomId, catechistId);
+        return ResponseEntity.ok(new ApiResponse("Catechist added to classroom successfully", null));
+    }
+
+    @DeleteMapping("/{classroomId}/catechists/{catechistId}/remove")
+    public ResponseEntity<ApiResponse> removeCatechistFromClassroom(@PathVariable Long classroomId,
+                                                                    @PathVariable Long catechistId) {
+        classroomService.removeCatechistFromClassroom(classroomId, catechistId);
+        return ResponseEntity.ok(new ApiResponse("Catechist removed from classroom successfully", null));
+    }
 
     @GetMapping("/{classroomId}")
     public ResponseEntity<ApiResponse> getClassroomById(@PathVariable Long classroomId) {

@@ -11,6 +11,7 @@ import com.programming.common.response.ApiResponse;
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import com.programming.management_service.domain.model.Classroom;
+import com.programming.management_service.management_caller.CatechistClient;
 import com.programming.management_service.management_caller.StudentClient;
 import com.programming.management_service.mapper.ClassroomMapper;
 import com.programming.management_service.repository.ClassroomRepository;
@@ -33,6 +34,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     private final ClassroomRepository classroomRepository;
     private final StudentClient studentClient;
+    private final CatechistClient catechistClient;
     private final ClassroomMapper classroomMapper;
     private final ObjectMapper objectMapper;
 
@@ -76,6 +78,12 @@ public class ClassroomServiceImpl implements ClassroomService {
             throw new AlreadyExistsException("Student with ID " + studentId + " is already in the classroom");
         }
 
+        // Check max students limit
+        //if (classroom.getMaxStudents() != null && 
+        //    classroom.getStudentIds().size() >= classroom.getMaxStudents()) {
+        //    throw new IllegalStateException("Classroom has reached maximum capacity: " + classroom.getMaxStudents());
+        //}
+
         // Validate student exists
         ApiResponse response = studentClient.getStudentById(studentId);
         StudentResponseDto student = objectMapper.convertValue(response.getData(), StudentResponseDto.class);
@@ -117,14 +125,83 @@ public class ClassroomServiceImpl implements ClassroomService {
                 .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + id));
 
         // update info from request
-        classroom.setName(requestDto.getName());
-        //classroom.setStudentIds(requestDto.getStudentIds() != null ? new HashSet<>(requestDto.getStudentIds()) : new HashSet<>());
+        if (requestDto.getName() != null) {
+            classroom.setName(requestDto.getName());
+        }
+        if (requestDto.getLevel() != null) {
+            classroom.setLevel(requestDto.getLevel());
+        }
+        if (requestDto.getAcademicYear() != null) {
+            classroom.setAcademicYear(requestDto.getAcademicYear());
+        }
+        if (requestDto.getRoom() != null) {
+            classroom.setRoom(requestDto.getRoom());
+        }
+        //if (requestDto.getMaxStudents() != null) {
+        //    classroom.setMaxStudents(requestDto.getMaxStudents());
+        //}
+        if (requestDto.getSchedule() != null) {
+            classroom.setSchedule(requestDto.getSchedule());
+        }
+        if (requestDto.getNote() != null) {
+            classroom.setNote(requestDto.getNote());
+        }
         if (requestDto.getStudentIds() != null) {
             classroom.setStudentIds(new HashSet<>(requestDto.getStudentIds()));
+        }
+        if (requestDto.getCatechistIds() != null) {
+            classroom.setCatechistIds(new HashSet<>(requestDto.getCatechistIds()));
         }
 
         Classroom updated = classroomRepository.save(classroom);
         return classroomMapper.toClassroomResponseDto(updated);
+    }
+
+    @Override
+    public void removeStudentFromClassroom(Long classroomId, Long studentId) {
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
+
+        if (!classroom.getStudentIds().contains(studentId)) {
+            throw new ResourceNotFoundException("Student with ID " + studentId + " is not in this classroom");
+        }
+
+        classroom.getStudentIds().remove(studentId);
+        classroomRepository.save(classroom);
+
+        // Update student's classroomId to null
+        StudentRequestDto updatedStudentDto = new StudentRequestDto();
+        updatedStudentDto.setClassroomId(null);
+        studentClient.updateStudent(studentId, updatedStudentDto);
+    }
+
+    @Override
+    public void addCatechistToClassroom(Long classroomId, Long catechistId) {
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
+
+        if (classroom.getCatechistIds().contains(catechistId)) {
+            throw new AlreadyExistsException("Catechist with ID " + catechistId + " is already in this classroom");
+        }
+
+        // Validate catechist exists
+        catechistClient.getCatechistById(catechistId);
+
+        classroom.getCatechistIds().add(catechistId);
+        classroomRepository.save(classroom);
+    }
+
+    @Override
+    public void removeCatechistFromClassroom(Long classroomId, Long catechistId) {
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
+
+        if (!classroom.getCatechistIds().contains(catechistId)) {
+            throw new ResourceNotFoundException("Catechist with ID " + catechistId + " is not in this classroom");
+        }
+
+        classroom.getCatechistIds().remove(catechistId);
+        classroomRepository.save(classroom);
     }
 
 }
