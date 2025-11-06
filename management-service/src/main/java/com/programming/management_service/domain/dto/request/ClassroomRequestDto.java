@@ -7,5 +7,13 @@ import java.util.Set;
 @Data
 public class ClassroomRequestDto {
     private String name;
+    private String level;
+    private Integer academicYear;
+    private String room;
+    //private Integer maxStudents;
+    private String schedule;
+    private String note;
+
     private Set<Long> studentIds;
+    private Set<Long> catechistIds;
 }

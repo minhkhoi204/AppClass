@@ -10,6 +10,14 @@ import java.util.Set;
 public class ClassroomResponseDto {
     private Long id;
     private String name;
+    private String level;
+    private Integer academicYear;
+    private String room;
+    //private Integer maxStudents;
+    private String schedule;
+    private String note;
+
     private Set<Long> studentIds;
+    private Set<Long> catechistIds;
     private List<StudentResponseDto> students;
 }
