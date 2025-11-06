@@ -19,7 +19,22 @@ public class Classroom {
     private Long id;
 
     private String name;
+    
+    private String level; //"pink, green, blue, yellow, brown"
+    
+    private Integer academicYear; // 2024, 2025
+    
+    private String room; 
+    
+    //private Integer maxStudents; // Maximum number of students allowed
+    
+    private String schedule; // "Sunday 7:00 AM - 9:00 AM"
+    
+    private String note;
 
     @ElementCollection
     private Set<Long> studentIds = new HashSet<>();
+    
+    @ElementCollection
+    private Set<Long> catechistIds = new HashSet<>(); 
 }
