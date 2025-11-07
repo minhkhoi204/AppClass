@@ -24,6 +24,6 @@ public class Student {
     private String motherPhoneNum;
     private String address;
 
-    private Long classroomId; // chỉ lưu id lớp học
+    private Long classroomId; //id classroom student attended
 }
 

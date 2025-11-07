@@ -22,4 +22,6 @@ public class CatechistRequestDto {
     private LocalDate catechistPromiseDate; // Promise date for HUYNH_TRUONG (Catechist)
     private Boolean isExecutiveBoard;
     private String note;
+
+    private Long classroomId;
 }

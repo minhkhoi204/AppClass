@@ -28,10 +28,11 @@ public class StudentMapper {
                 .motherPhoneNum(student.getMotherPhoneNum())
                 .address(student.getAddress())
                 //.classroomName(student.getClassroom() != null ? student.getClassroom().getName() : null)
+                .classroomId(student.getClassroomId())
                 .build();
     }
 
-    public Student toStudentEntity(StudentRequestDto dto, User user) {
+    public Student toStudentEntity(StudentRequestDto dto, User user) { //input dto request to entity to save in db
         Student student = new Student();
         student.setUser(user);
         student.setFatherName(dto.getFatherName());
@@ -39,7 +40,7 @@ public class StudentMapper {
         student.setMotherName(dto.getMotherName());
         student.setMotherPhoneNum(dto.getMotherPhoneNum());
         student.setAddress(dto.getAddress());
-        //student.setClassroomId(dto.getClassroomId());
+        ///student.setClassroomId(dto.getClassroomId());
         return student;
     }
 

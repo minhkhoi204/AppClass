@@ -1,6 +1,8 @@
 package com.programming.management_service.service.classroom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.programming.common.common_dto.catechist.CatechistRequestDto;
+import com.programming.common.common_dto.catechist.CatechistResponseDto;
 import com.programming.common.common_dto.student.StudentRequestDto;
 import com.programming.common.common_dto.student.StudentResponseDto;
 
@@ -37,7 +39,6 @@ public class ClassroomServiceImpl implements ClassroomService {
     private final CatechistClient catechistClient;
     private final ClassroomMapper classroomMapper;
     private final ObjectMapper objectMapper;
-
 
     @Override
     public ClassroomResponseDto createClassroom(ClassroomRequestDto dto) {
@@ -185,10 +186,18 @@ public class ClassroomServiceImpl implements ClassroomService {
         }
 
         // Validate catechist exists
-        catechistClient.getCatechistById(catechistId);
+        //catechistClient.getCatechistById(catechistId);
+        ApiResponse response = catechistClient.getCatechistById(catechistId);
+        CatechistResponseDto catechist = objectMapper.convertValue(response.getData(), CatechistResponseDto.class);
 
-        classroom.getCatechistIds().add(catechistId);
+        //classroom.getCatechistIds().add(catechistId);
+        classroom.getCatechistIds().add(catechist.getId());
         classroomRepository.save(classroom);
+
+        CatechistRequestDto updatedCatechistDto = new CatechistRequestDto();
+        updatedCatechistDto.setClassroomId(classroomId);
+
+        catechistClient.updateCatechist(catechistId, updatedCatechistDto);
     }
 
     @Override

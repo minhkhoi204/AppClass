@@ -31,6 +31,8 @@ public class Catechist {
     private Boolean isExecutiveBoard; // check if catechist is in executive board
 
     private String note;
+
+    private Long classroomId; //id classroom catechist managed
     
     // Helper methods
     public boolean hasAssistantCatechistPromised() {

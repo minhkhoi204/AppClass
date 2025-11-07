@@ -170,6 +170,10 @@ public class CatechistServiceImpl implements CatechistService {
         if (requestDto.getNote() != null) {
             catechist.setNote(requestDto.getNote());
         }
+        
+        if (requestDto.getClassroomId() != null) {
+            catechist.setClassroomId(requestDto.getClassroomId());
+        }
 
         catechistRepository.save(catechist);
         userRepository.save(user);
