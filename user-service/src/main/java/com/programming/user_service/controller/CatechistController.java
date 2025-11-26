@@ -7,6 +7,7 @@ import com.programming.user_service.service.catechist.CatechistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class CatechistController {
     private CatechistService catechistService;
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> createCatechist(
             @RequestBody CatechistRequestDto requestDto) {
         CatechistResponseDto response = catechistService.createCatechist(requestDto);
@@ -25,6 +27,7 @@ public class CatechistController {
     }
 
     @PostMapping("/create-with-user")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> createCatechistWithUserId(
             @RequestBody CatechistRequestDto requestDto,
             @RequestParam Long userId) {
@@ -34,6 +37,7 @@ public class CatechistController {
     }
 
     @PutMapping("/{id}/update")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> updateCatechist(
             @PathVariable Long id, 
             @RequestBody CatechistRequestDto requestDto) {
@@ -42,18 +46,21 @@ public class CatechistController {
     }
 
     @DeleteMapping("/{id}/delete")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<Void> deleteCatechist(@PathVariable Long id) {
         catechistService.deleteCatechist(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse> getCatechistById(@PathVariable Long id) {
         CatechistResponseDto response = catechistService.getCatechistById(id);
         return ResponseEntity.ok(new ApiResponse("Catechist retrieved successfully", response));
     }
 
     @GetMapping("/all")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse> getAllCatechists() {
         List<CatechistResponseDto> response = catechistService.getAllCatechists();
         return ResponseEntity.ok(new ApiResponse("All catechists retrieved successfully", response));

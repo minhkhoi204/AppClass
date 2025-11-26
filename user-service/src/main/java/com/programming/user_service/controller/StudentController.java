@@ -8,6 +8,7 @@ import com.programming.user_service.service.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class StudentController {
 //    }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI', 'THU_KY')")
     public ResponseEntity<ApiResponse> createStudent(@RequestBody StudentRequestDto dto) {
         StudentResponseDto response = studentService.createStudent(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -37,12 +39,14 @@ public class StudentController {
 //        return ResponseEntity.ok(student);
 //    }
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse> getStudentById(@PathVariable Long id) {
         StudentResponseDto response = studentService.getStudentById(id);
         return ResponseEntity.ok(new ApiResponse("Student retrieved successfully", response));
     }
 
     @PostMapping("/create-with-user")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI', 'THU_KY')")
     public ResponseEntity<ApiResponse> createStudentWithUserId(
             @RequestBody StudentRequestDto studentRequestDto,
             @RequestParam Long userId) {
@@ -53,6 +57,7 @@ public class StudentController {
     }
 
     @PutMapping("/{id}/update")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI', 'THU_KY')")
     public ResponseEntity<ApiResponse> updateStudent(@PathVariable Long id, @RequestBody StudentRequestDto dto) {
         StudentResponseDto response = studentService.updateStudent(id, dto);
         return ResponseEntity.ok(new ApiResponse("Student updated successfully", response));
