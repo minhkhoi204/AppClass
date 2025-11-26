@@ -11,6 +11,7 @@ import com.programming.management_service.service.classroom.ClassroomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +25,9 @@ public class ClassroomController {
     private final ClassroomService classroomService;
     private final ClassroomMapper classroomMapper;
 
-    // Create class
+    // Create class - Only Executive Board
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> createClassroom(@RequestBody ClassroomRequestDto classroomRequestDto) {
         ClassroomResponseDto responseDto = classroomService.createClassroom(classroomRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -33,6 +35,7 @@ public class ClassroomController {
     }
 
     @PostMapping("/{classroomId}/students/{studentId}/add")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI', 'THU_KY')")
     public ResponseEntity<ApiResponse> addStudentToClassroom(@PathVariable Long classroomId,
                                                              @PathVariable Long studentId) {
         classroomService.addStudentToClassroom(classroomId, studentId);
@@ -40,6 +43,7 @@ public class ClassroomController {
     }
 
     @DeleteMapping("/{classroomId}/students/{studentId}/remove")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI', 'THU_KY')")
     public ResponseEntity<ApiResponse> removeStudentFromClassroom(@PathVariable Long classroomId,
                                                                   @PathVariable Long studentId) {
         classroomService.removeStudentFromClassroom(classroomId, studentId);
@@ -47,6 +51,7 @@ public class ClassroomController {
     }
 
     @PostMapping("/{classroomId}/catechists/{catechistId}/add")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> addCatechistToClassroom(@PathVariable Long classroomId,
                                                                @PathVariable Long catechistId) {
         classroomService.addCatechistToClassroom(classroomId, catechistId);
@@ -54,6 +59,7 @@ public class ClassroomController {
     }
 
     @DeleteMapping("/{classroomId}/catechists/{catechistId}/remove")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> removeCatechistFromClassroom(@PathVariable Long classroomId,
                                                                     @PathVariable Long catechistId) {
         classroomService.removeCatechistFromClassroom(classroomId, catechistId);
@@ -61,12 +67,14 @@ public class ClassroomController {
     }
 
     @GetMapping("/{classroomId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse> getClassroomById(@PathVariable Long classroomId) {
         ClassroomResponseDto classroom = classroomService.getClassroomById(classroomId);
         return ResponseEntity.ok(new ApiResponse("Success", classroom));
     }
 
     @PutMapping("/{classroomId}/update")
+    @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> updateClassroom(@PathVariable Long classroomId,
                                                        @RequestBody ClassroomRequestDto classroomRequestDto) {
         ClassroomResponseDto updated = classroomService.updateClassroom(classroomId, classroomRequestDto);
