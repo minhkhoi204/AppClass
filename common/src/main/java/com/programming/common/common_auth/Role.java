@@ -8,7 +8,8 @@ public enum Role {
     PHO_NGOAI("pho_ngoai"),
     THU_QUY("thu_quy"),
     THU_KY("thu_ky"),
-    THIEU_NHI("thieu_nhi");
+    THIEU_NHI("thieu_nhi"),
+    BASIC_USER("nguoi_dung");
 
     private final String text;
 
