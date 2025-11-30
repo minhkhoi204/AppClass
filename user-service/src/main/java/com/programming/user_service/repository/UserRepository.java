@@ -1,0 +1,16 @@
+package com.programming.user_service.repository;
+
+import com.programming.user_service.domain.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUserName(String username);
+    boolean existsByEmail(String email);
+
+    boolean existsByUserName(String username);
+    boolean existsByFullNameAndChristianName(String fullName, String christianName);
+
+
+    boolean existsById(Long id);
+}
