@@ -1,0 +1,17 @@
+management-service/target/classes/com/programming/management_service/config/JwtAuthenticationFilter.class
+user-service/target/classes/com/programming/user_service/service/catechist/CatechistServiceImpl.class
+user-service/target/classes/com/programming/user_service/service/auth/CustomUserDetailsService.class
+user-service/target/classes/com/programming/user_service/controller/StudentController.class
+user-service/target/classes/com/programming/user_service/controller/CatechistController.class
+user-service/target/classes/com/programming/user_service/config/SecurityConfig.class
+user-service/target/classes/com/programming/user_service/config/JwtConfig.class
+user-service/target/classes/com/programming/user_service/config/DataInitializer.class
+user-service/target/classes/com/programming/user_service/config/CustomUserDetails.class
+management-service/target/classes/com/programming/management_service/controller/ClassroomController.class
+management-service/target/classes/com/programming/management_service/config/SecurityConfig.class
+management-service/target/classes/com/programming/management_service/config/JwtConfig.class
+
+user-service/target/classes/com/programming/user_service/service/auth/AuthService.class
+user-service/target/classes/com/programming/user_service/controller/AuthController.class
+management-service/target/classes/com/programming/management_service/controller/AuthController.class
+management-service/target/classes/com/programming/management_service/service/auth/AuthService.class
