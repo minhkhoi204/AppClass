@@ -4,6 +4,7 @@ import com.programming.common.common_dto.student.StudentRequestDto;
 import com.programming.common.common_dto.student.StudentResponseDto;
 
 import com.programming.common.response.ApiResponse;
+import com.programming.management_service.config.FeignConfig;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,8 @@ import java.util.Set;
 @FeignClient(
         name = "user-service",
         url = "${user.service.url}",
-        contextId = "studentClient"
+        contextId = "studentClient",
+        configuration = FeignConfig.class
 )
 public interface StudentClient {
 

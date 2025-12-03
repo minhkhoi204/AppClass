@@ -5,13 +5,15 @@ import com.programming.common.common_dto.catechist.CatechistResponseDto;
 import com.programming.common.common_dto.student.StudentRequestDto;
 import com.programming.common.common_dto.student.StudentResponseDto;
 import com.programming.common.response.ApiResponse;
+import com.programming.management_service.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 @FeignClient(
         name = "user-service",
         url = "${user.service.url}",
-        contextId = "catechistClient"
+        contextId = "catechistClient",
+        configuration = FeignConfig.class
 )
 public interface CatechistClient {
 
