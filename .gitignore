@@ -1,4 +1,5 @@
 **/target
+**/.idea
 user-service/target/classes/com/programming/user_service/config/SecurityConfig.class
 user-service/target/classes/com/programming/user_service/config/JwtConfig.class
 user-service/target/classes/com/programming/user_service/config/DataInitializer.class
