@@ -1,5 +1,6 @@
 package com.programming.management_service.domain.dto.response;
 
+import com.programming.common.common_dto.catechist.CatechistResponseDto;
 import com.programming.common.common_dto.student.StudentResponseDto;
 import lombok.Data;
 
@@ -20,4 +21,5 @@ public class ClassroomResponseDto {
     private Set<Long> studentIds;
     private Set<Long> catechistIds;
     private List<StudentResponseDto> students;
+    private List<CatechistResponseDto> catechists;
 }

@@ -60,6 +60,15 @@ public class ClassroomServiceImpl implements ClassroomService {
                 .collect(Collectors.toList());
     }
 
+    private List<CatechistResponseDto> getCatechistsInClassroom(Classroom classroom) {
+        return classroom.getCatechistIds().stream()
+                .map(catechistId -> {
+                    ApiResponse response = catechistClient.getCatechistById(catechistId);
+                    return objectMapper.convertValue(response.getData(), CatechistResponseDto.class);
+                })
+                .collect(Collectors.toList());
+    }
+
     @Override
     public ClassroomResponseDto getClassroomById(Long id) {
         Classroom classroom = classroomRepository.findById(id)
@@ -67,6 +76,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         ClassroomResponseDto dto = classroomMapper.toClassroomResponseDto(classroom);
         dto.setStudents(getStudentsInClassroom(classroom));
+        dto.setCatechists(getCatechistsInClassroom(classroom));
         return dto;
     }
 

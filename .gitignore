@@ -12,3 +12,4 @@ user-service/target/classes/com/programming/user_service/service/auth/AuthServic
 user-service/target/classes/com/programming/user_service/controller/AuthController.class
 management-service/target/classes/com/programming/management_service/controller/AuthController.class
 management-service/target/classes/com/programming/management_service/service/auth/AuthService.class
+.idea/compiler.xml

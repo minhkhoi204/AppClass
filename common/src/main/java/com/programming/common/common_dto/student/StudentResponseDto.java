@@ -26,6 +26,6 @@ public class StudentResponseDto {
 
     private Long userId;
 
-    private String classroomName; // assuming Student has a classroom field
+    //private String classroomName; // assuming Student has a classroom field
     private Long classroomId;
 }
