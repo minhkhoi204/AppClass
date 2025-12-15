@@ -6,6 +6,8 @@ import com.programming.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -33,6 +35,18 @@ public class ExceptionHandling {
     public ResponseEntity<ApiResponse> handleIllegalState(IllegalStateException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(e.getMessage(), null));
+    }
+
+    @ExceptionHandler({BadCredentialsException.class})
+    public ResponseEntity<ApiResponse> handleBadCredentials(BadCredentialsException e) {
+        log.error("Bad credentials: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(e.getMessage(), null));
+    }
+
+    @ExceptionHandler({AccessDeniedException.class})
+    public ResponseEntity<ApiResponse> handleAccessDenied(AccessDeniedException e) {
+        log.error("Access denied: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse("Access denied: " + e.getMessage(), null));
     }
 
     @ExceptionHandler(Exception.class)
