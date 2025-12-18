@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class RegisterRequest {
-    private String username;
+    private String userName;
     private String password;
     private String fullName;
     private String christianName;

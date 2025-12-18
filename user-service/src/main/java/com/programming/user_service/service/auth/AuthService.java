@@ -34,7 +34,7 @@ public class AuthService {
             // Authenticate user
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
+                            request.getUserName(),
                             request.getPassword()
                     )
             );
@@ -73,8 +73,8 @@ public class AuthService {
      */
     public AuthResponse register(RegisterRequest request) {
         // Check if username already exists
-        if (userRepository.existsByUserName(request.getUsername())) {
-            throw new AlreadyExistsException("Username already exists: " + request.getUsername());
+        if (userRepository.existsByUserName(request.getUserName())) {
+            throw new AlreadyExistsException("Username already exists: " + request.getUserName());
         }
 
         // Check if user with same fullName and christianName exists
@@ -86,7 +86,7 @@ public class AuthService {
 
         // Create new user with THIEU_NHI role (default for registration)
         User user = User.builder()
-                .userName(request.getUsername())
+                .userName(request.getUserName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .christianName(request.getChristianName())
