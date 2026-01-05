@@ -22,7 +22,7 @@ public class Classroom {
     
     private String level; //"pink, green, blue, yellow, brown"
     
-    private Integer academicYear; // 2024, 2025
+    private String academicYear; // "2024", "2025"
     
     private String room; 
     

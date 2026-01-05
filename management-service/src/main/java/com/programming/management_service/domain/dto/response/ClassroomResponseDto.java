@@ -11,7 +11,7 @@ public class ClassroomResponseDto {
     private Long id;
     private String name;
     private String level;
-    private Integer academicYear;
+    private String academicYear;
     private String room;
     //private Integer maxStudents;
     private String schedule;

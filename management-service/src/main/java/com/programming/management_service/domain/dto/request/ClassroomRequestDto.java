@@ -8,7 +8,7 @@ import java.util.Set;
 public class ClassroomRequestDto {
     private String name;
     private String level;
-    private Integer academicYear;
+    private String academicYear;
     private String room;
     //private Integer maxStudents;
     private String schedule;
