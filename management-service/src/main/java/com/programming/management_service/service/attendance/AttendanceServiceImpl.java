@@ -149,14 +149,14 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
 
         // Check if student already attended
-        if (recordRepository.existsByAttendanceSessionIdAndStudentCode(dto.getAttendanceSessionId(), dto.getStudentCode())) {
+        if (recordRepository.existsByAttendanceSessionIdAndStudentId(dto.getAttendanceSessionId(), dto.getStudentId())) {
             throw new AlreadyExistsException("Student already has attendance record in this session");
         }
 
         AttendanceRecord record = recordMapper.toAttendanceRecordEntity(dto, recordedBy);
         AttendanceRecord saved = recordRepository.save(record);
         
-        log.info("Created attendance record for student: {} in session: {}", dto.getStudentCode(), dto.getAttendanceSessionId());
+        log.info("Created attendance record for student: {} in session: {}", dto.getStudentId(), dto.getAttendanceSessionId());
         return recordMapper.toAttendanceRecordResponseDto(saved);
     }
 
@@ -176,8 +176,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public List<AttendanceRecordResponseDto> getRecordsByStudent(String studentCode) {
-        List<AttendanceRecord> records = recordRepository.findByStudentCode(studentCode);
+    public List<AttendanceRecordResponseDto> getRecordsByStudent(Long studentId) {
+        List<AttendanceRecord> records = recordRepository.findByStudentId(studentId);
         return records.stream()
                 .map(recordMapper::toAttendanceRecordResponseDto)
                 .collect(Collectors.toList());
@@ -216,8 +216,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public boolean isStudentAttended(Long sessionId, String studentCode) {
-        return recordRepository.existsByAttendanceSessionIdAndStudentCode(sessionId, studentCode);
+    public boolean isStudentAttended(Long sessionId, Long studentId) {
+        return recordRepository.existsByAttendanceSessionIdAndStudentId(sessionId, studentId);
     }
 
     // Batch Operations
@@ -230,7 +230,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                     try {
                         return createRecord(dto, recordedBy);
                     } catch (Exception e) {
-                        log.error("Failed to create attendance record for student: {}", dto.getStudentCode(), e);
+                        log.error("Failed to create attendance record for student: {}", dto.getStudentId(), e);
                         return null;
                     }
                 })
@@ -334,13 +334,13 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public AttendanceRecordResponseDto getStudentAttendanceReport(
-            String studentCode, LocalDate startDate, LocalDate endDate) {
+            Long studentId, LocalDate startDate, LocalDate endDate) {
         // need more complex logic to aggregate data
         throw new UnsupportedOperationException("This feature is not yet implemented");
     }
 
     @Override
-    public List<String> getFrequentAbsentStudents(
+    public List<Long> getFrequentAbsentStudents(
             Long classroomId, LocalDate startDate, LocalDate endDate, int threshold) {
         
         List<AttendanceSession> sessions = sessionRepository.findByClassroomIdAndDateRange(
@@ -353,7 +353,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         // Get all records for these sessions
         return sessionIds.stream()
                 .flatMap(sessionId -> recordRepository.findByAttendanceSessionIdAndStatus(sessionId, AttendanceStatus.ABSENT).stream())
-                .collect(Collectors.groupingBy(AttendanceRecord::getStudentCode, Collectors.counting()))
+                .collect(Collectors.groupingBy(AttendanceRecord::getStudentId, Collectors.counting()))
                 .entrySet().stream()
                 .filter(entry -> entry.getValue() >= threshold)
                 .map(entry -> entry.getKey())
