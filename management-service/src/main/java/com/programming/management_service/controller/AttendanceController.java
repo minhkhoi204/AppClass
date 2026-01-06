@@ -121,10 +121,10 @@ public class AttendanceController {
         return ResponseEntity.ok(new ApiResponse("Success", records));
     }
 
-    @GetMapping("/records/student/{studentCode}")
+    @GetMapping("/records/enrollment/{enrollmentId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse> getRecordsByStudent(@PathVariable String studentCode) {
-        List<AttendanceRecordResponseDto> records = attendanceService.getRecordsByStudent(studentCode);
+    public ResponseEntity<ApiResponse> getRecordsByEnrollment(@PathVariable Long enrollmentId) {
+        List<AttendanceRecordResponseDto> records = attendanceService.getRecordsByEnrollment(enrollmentId);
         return ResponseEntity.ok(new ApiResponse("Success", records));
     }
 
@@ -146,10 +146,10 @@ public class AttendanceController {
 
     @GetMapping("/records/check")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse> checkStudentAttended(
+    public ResponseEntity<ApiResponse> checkEnrollmentAttended(
             @RequestParam Long sessionId,
-            @RequestParam String studentCode) {
-        boolean attended = attendanceService.isStudentAttended(sessionId, studentCode);
+            @RequestParam Long enrollmentId) {
+        boolean attended = attendanceService.isEnrollmentAttended(sessionId, enrollmentId);
         return ResponseEntity.ok(new ApiResponse("Success", attended));
     }
 
@@ -202,8 +202,8 @@ public class AttendanceController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "3") int threshold) {
-        List<String> studentCodes = attendanceService.getFrequentAbsentStudents(classroomId, startDate, endDate, threshold);
-        return ResponseEntity.ok(new ApiResponse("Found " + studentCodes.size() + " students", studentCodes));
+        List<Long> enrollmentIds = attendanceService.getFrequentAbsentEnrollments(classroomId, startDate, endDate, threshold);
+        return ResponseEntity.ok(new ApiResponse("Found " + enrollmentIds.size() + " enrollments", enrollmentIds));
     }
 
     @GetMapping("/reports/attendance-rate")

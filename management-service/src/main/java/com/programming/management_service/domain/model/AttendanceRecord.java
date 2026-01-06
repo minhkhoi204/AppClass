@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "attendance_record", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"attendance_session_id", "student_code"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"attendance_session_id", "enrollment_id"}))
 public class AttendanceRecord {
     
     @Id
@@ -25,9 +25,9 @@ public class AttendanceRecord {
     @Column(name = "attendance_session_id", nullable = false)
     private Long attendanceSessionId;
     
-    // student code (e.g., "01vd1", "02kt2")
-    @Column(name = "student_code", nullable = false, length = 20)
-    private String studentCode;
+    // enrollment ID (links to specific student enrollment in classroom)
+    @Column(name = "enrollment_id", nullable = false)
+    private Long enrollmentId;
 
     // PRESENT, ABSENT, LATE, EXCUSED
     @Enumerated(EnumType.STRING)

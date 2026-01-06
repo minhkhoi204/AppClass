@@ -35,13 +35,13 @@ public interface AttendanceService {
   
     List<AttendanceRecordResponseDto> getRecordsBySession(Long sessionId);
 
-    List<AttendanceRecordResponseDto> getRecordsByStudent(String studentCode);
+    List<AttendanceRecordResponseDto> getRecordsByEnrollment(Long enrollmentId);
 
     AttendanceRecordResponseDto updateRecord(Long id, AttendanceRecordRequestDto dto);
 
     void deleteRecord(Long id);
 
-    boolean isStudentAttended(Long sessionId, String studentCode);
+    boolean isEnrollmentAttended(Long sessionId, Long enrollmentId);
 
         
     // Batch Operations
@@ -59,9 +59,9 @@ public interface AttendanceService {
 
     // adjust later
     AttendanceRecordResponseDto getStudentAttendanceReport(
-            String studentCode, LocalDate startDate, LocalDate endDate);
+            Long studentId, LocalDate startDate, LocalDate endDate);
 
-    List<String> getFrequentAbsentStudents(Long classroomId, LocalDate startDate, LocalDate endDate, int threshold);
+    List<Long> getFrequentAbsentEnrollments(Long classroomId, LocalDate startDate, LocalDate endDate, int threshold);
 
     Double getClassroomAttendanceRate(Long classroomId, LocalDate startDate, LocalDate endDate);
 }

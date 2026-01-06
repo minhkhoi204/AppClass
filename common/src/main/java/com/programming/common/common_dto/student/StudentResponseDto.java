@@ -28,6 +28,4 @@ public class StudentResponseDto {
 
     private String classroomName; // assuming Student has a classroom field
     private Long classroomId;
-    
-    private String studentCode; // student code
 }

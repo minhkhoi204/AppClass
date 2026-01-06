@@ -24,6 +24,5 @@ public class StudentRequestDto {
     private Long userId;
 
     private Long classroomId;
-    
-    private String studentCode; // student code
+
 }

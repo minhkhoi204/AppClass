@@ -12,6 +12,7 @@ import com.programming.management_service.mapper.AttendanceSessionMapper;
 import com.programming.management_service.repository.AttendanceRecordRepository;
 import com.programming.management_service.repository.AttendanceSessionRepository;
 import com.programming.management_service.repository.ClassroomRepository;
+import com.programming.management_service.repository.EnrollmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final AttendanceSessionRepository sessionRepository;
     private final AttendanceRecordRepository recordRepository;
     private final ClassroomRepository classroomRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final AttendanceSessionMapper sessionMapper;
     private final AttendanceRecordMapper recordMapper;
 
@@ -148,38 +150,58 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new IllegalStateException("Cannot create attendance record. Session is cancelled.");
         }
 
-        // Check if student already attended
-        if (recordRepository.existsByAttendanceSessionIdAndStudentCode(dto.getAttendanceSessionId(), dto.getStudentCode())) {
+        // Get classroom info to find enrollment
+        Classroom classroom = classroomRepository.findById(session.getClassroomId())
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
+
+        // Resolve enrollmentId from studentCode
+        Enrollment enrollment = enrollmentRepository
+                .findByClassroomIdAndAcademicYearAndStudentCodeAndStatus(
+                        classroom.getId(), 
+                        classroom.getAcademicYear(), 
+                        dto.getStudentCode(),
+                        EnrollmentStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No active enrollment found for student code: " + dto.getStudentCode() + 
+                        " in classroom: " + classroom.getName()));
+
+        // Check if enrollment already attended
+        if (recordRepository.existsByAttendanceSessionIdAndEnrollmentId(
+                dto.getAttendanceSessionId(), enrollment.getId())) {
             throw new AlreadyExistsException("Student already has attendance record in this session");
         }
 
-        AttendanceRecord record = recordMapper.toAttendanceRecordEntity(dto, recordedBy);
+        AttendanceRecord record = recordMapper.toAttendanceRecordEntity(dto, enrollment.getId(), recordedBy);
         AttendanceRecord saved = recordRepository.save(record);
         
-        log.info("Created attendance record for student: {} in session: {}", dto.getStudentCode(), dto.getAttendanceSessionId());
-        return recordMapper.toAttendanceRecordResponseDto(saved);
+        log.info("Created attendance record for student code: {} (enrollment: {}) in session: {}", 
+                dto.getStudentCode(), enrollment.getId(), dto.getAttendanceSessionId());
+        
+        AttendanceRecordResponseDto response = recordMapper.toAttendanceRecordResponseDto(saved);
+        response.setStudentCode(enrollment.getStudentCode()); // enrich with student code
+        return response;
     }
 
     @Override
     public AttendanceRecordResponseDto getRecordById(Long id) {
         AttendanceRecord record = recordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Attendance record not found with id: " + id));
-        return recordMapper.toAttendanceRecordResponseDto(record);
+        return enrichWithStudentCode(record);
     }
 
     @Override
     public List<AttendanceRecordResponseDto> getRecordsBySession(Long sessionId) {
         List<AttendanceRecord> records = recordRepository.findByAttendanceSessionId(sessionId);
         return records.stream()
-                .map(recordMapper::toAttendanceRecordResponseDto)
+                .map(this::enrichWithStudentCode)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<AttendanceRecordResponseDto> getRecordsByStudent(String studentCode) {
-        List<AttendanceRecord> records = recordRepository.findByStudentCode(studentCode);
+    public List<AttendanceRecordResponseDto> getRecordsByEnrollment(Long enrollmentId) {
+        List<AttendanceRecord> records = recordRepository.findByEnrollmentId(enrollmentId);
         return records.stream()
-                .map(recordMapper::toAttendanceRecordResponseDto)
+                .map(this::enrichWithStudentCode)
                 .collect(Collectors.toList());
     }
 
@@ -201,7 +223,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         AttendanceRecord updated = recordRepository.save(record);
         
         log.info("Updated attendance record: {}", id);
-        return recordMapper.toAttendanceRecordResponseDto(updated);
+        return enrichWithStudentCode(updated);
     }
 
     @Override
@@ -216,8 +238,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public boolean isStudentAttended(Long sessionId, String studentCode) {
-        return recordRepository.existsByAttendanceSessionIdAndStudentCode(sessionId, studentCode);
+    public boolean isEnrollmentAttended(Long sessionId, Long enrollmentId) {
+        return recordRepository.existsByAttendanceSessionIdAndEnrollmentId(sessionId, enrollmentId);
     }
 
     // Batch Operations
@@ -230,7 +252,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                     try {
                         return createRecord(dto, recordedBy);
                     } catch (Exception e) {
-                        log.error("Failed to create attendance record for student: {}", dto.getStudentCode(), e);
+                        log.error("Failed to create attendance record for student code: {}", dto.getStudentCode(), e);
                         return null;
                     }
                 })
@@ -334,13 +356,13 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public AttendanceRecordResponseDto getStudentAttendanceReport(
-            String studentCode, LocalDate startDate, LocalDate endDate) {
+            Long studentId, LocalDate startDate, LocalDate endDate) {
         // need more complex logic to aggregate data
         throw new UnsupportedOperationException("This feature is not yet implemented");
     }
 
     @Override
-    public List<String> getFrequentAbsentStudents(
+    public List<Long> getFrequentAbsentEnrollments(
             Long classroomId, LocalDate startDate, LocalDate endDate, int threshold) {
         
         List<AttendanceSession> sessions = sessionRepository.findByClassroomIdAndDateRange(
@@ -353,7 +375,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         // Get all records for these sessions
         return sessionIds.stream()
                 .flatMap(sessionId -> recordRepository.findByAttendanceSessionIdAndStatus(sessionId, AttendanceStatus.ABSENT).stream())
-                .collect(Collectors.groupingBy(AttendanceRecord::getStudentCode, Collectors.counting()))
+                .collect(Collectors.groupingBy(AttendanceRecord::getEnrollmentId, Collectors.counting()))
                 .entrySet().stream()
                 .filter(entry -> entry.getValue() >= threshold)
                 .map(entry -> entry.getKey())
@@ -378,5 +400,16 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
         
         return (double) presentRecords / totalRecords * 100;
+    }
+    
+    // enrich attendance record response with student code
+    private AttendanceRecordResponseDto enrichWithStudentCode(AttendanceRecord record) {
+        AttendanceRecordResponseDto dto = recordMapper.toAttendanceRecordResponseDto(record);
+        
+        //enrollment to get student code
+        enrollmentRepository.findById(record.getEnrollmentId())
+                .ifPresent(enrollment -> dto.setStudentCode(enrollment.getStudentCode()));
+        
+        return dto;
     }
 }

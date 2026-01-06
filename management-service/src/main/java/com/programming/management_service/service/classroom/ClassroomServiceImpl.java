@@ -11,12 +11,15 @@ import com.programming.common.exception.ResourceNotFoundException;
 import com.programming.common.response.ApiResponse;
 
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
+import com.programming.management_service.domain.dto.request.EnrollmentRequestDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import com.programming.management_service.domain.model.Classroom;
+import com.programming.management_service.domain.model.EnrollmentStatus;
 import com.programming.management_service.management_caller.CatechistClient;
 import com.programming.management_service.management_caller.StudentClient;
 import com.programming.management_service.mapper.ClassroomMapper;
 import com.programming.management_service.repository.ClassroomRepository;
+import com.programming.management_service.service.enrollment.EnrollmentService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -39,6 +42,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     private final CatechistClient catechistClient;
     private final ClassroomMapper classroomMapper;
     private final ObjectMapper objectMapper;
+    private final EnrollmentService enrollmentService;
 
     @Override
     public ClassroomResponseDto createClassroom(ClassroomRequestDto dto) {
@@ -79,28 +83,27 @@ public class ClassroomServiceImpl implements ClassroomService {
             throw new AlreadyExistsException("Student with ID " + studentId + " is already in the classroom");
         }
 
-        // Check max students limit
-        //if (classroom.getMaxStudents() != null && 
-        //    classroom.getStudentIds().size() >= classroom.getMaxStudents()) {
-        //    throw new IllegalStateException("Classroom has reached maximum capacity: " + classroom.getMaxStudents());
-        //}
-
         // Validate student exists
         ApiResponse response = studentClient.getStudentById(studentId);
         StudentResponseDto student = objectMapper.convertValue(response.getData(), StudentResponseDto.class);
 
-        // create student code
-        int studentNumber = classroom.getStudentIds().size() + 1;
-        String studentCode = generateStudentCode(classroom.getName(), studentNumber);
+        // Create enrollment for this student
+        EnrollmentRequestDto enrollmentDto = EnrollmentRequestDto.builder()
+                .studentId(studentId)
+                .classroomId(classroomId)
+                .academicYear(classroom.getAcademicYear())
+                .status(EnrollmentStatus.ACTIVE)
+                .build();
+        
+        enrollmentService.createEnrollment(enrollmentDto);
 
+        // Add student to classroom
         classroom.getStudentIds().add(student.getId());
         classroomRepository.save(classroom);
 
-        // Update student with classroomId and studentCode
+        // Update student with classroomId
         StudentRequestDto updatedStudentDto = new StudentRequestDto();
         updatedStudentDto.setClassroomId(classroomId);
-        updatedStudentDto.setStudentCode(studentCode);
-
         studentClient.updateStudent(studentId, updatedStudentDto);
     }
 
@@ -218,30 +221,4 @@ public class ClassroomServiceImpl implements ClassroomService {
         classroom.getCatechistIds().remove(catechistId);
         classroomRepository.save(classroom);
     }
-
-    // generate student code based on classroom name and student number
-    private String generateStudentCode(String classroomName, int studentNumber) {
-        String[] words = classroomName.trim().toLowerCase().split("\\s+");
-        
-        if (words.length == 0) {
-            throw new IllegalArgumentException("Invalid classroom name: " + classroomName);
-        }
-        
-        StringBuilder codeBuilder = new StringBuilder();
-        
-        codeBuilder.append(String.format("%02d", studentNumber));
-        
-        for (String word : words) {
-            if (word.isEmpty()) continue;
-            
-            if (word.matches("\\d+")) {
-                codeBuilder.append(word);
-            } else {
-                codeBuilder.append(word.charAt(0));
-            }
-        }
-        
-        return codeBuilder.toString();
-    }
-
 }

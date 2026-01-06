@@ -16,7 +16,9 @@ public class AttendanceRecordResponseDto {
     
     private Long attendanceSessionId;
     
-    private String studentCode;
+    private Long enrollmentId;
+    
+    private String studentCode; // For display (e.g., "01vd1")
     
     private AttendanceStatus status;
     

@@ -13,10 +13,11 @@ import java.time.LocalDateTime;
 public class AttendanceRecordMapper {
 
     // transform AttendanceRecordRequestDto to AttendanceRecord entity, recordedBy: id catechist
-    public AttendanceRecord toAttendanceRecordEntity(AttendanceRecordRequestDto dto, Long recordedBy) {
+    // enrollmentId is resolved from studentCode in service layer
+    public AttendanceRecord toAttendanceRecordEntity(AttendanceRecordRequestDto dto, Long enrollmentId, Long recordedBy) {
         return AttendanceRecord.builder()
                 .attendanceSessionId(dto.getAttendanceSessionId())
-                .studentCode(dto.getStudentCode())
+                .enrollmentId(enrollmentId)
                 .status(dto.getStatus())
                 .checkedInTime(dto.getCheckedInTime() != null ? dto.getCheckedInTime() : LocalDateTime.now())
                 .note(dto.getNote())
@@ -29,7 +30,7 @@ public class AttendanceRecordMapper {
         return AttendanceRecordResponseDto.builder()
                 .id(record.getId())
                 .attendanceSessionId(record.getAttendanceSessionId())
-                .studentCode(record.getStudentCode())
+                .enrollmentId(record.getEnrollmentId())
                 .status(record.getStatus())
                 .checkedInTime(record.getCheckedInTime())
                 .note(record.getNote())
