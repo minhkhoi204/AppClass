@@ -25,5 +25,8 @@ public class Student {
     private String address;
 
     private Long classroomId; //id classroom student attended
+    
+    @Column(unique = true)
+    private String studentCode; // student code
 }
 

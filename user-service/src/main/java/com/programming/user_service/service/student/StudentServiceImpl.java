@@ -110,6 +110,10 @@ public class StudentServiceImpl implements StudentService {
         if (updatedStudentDto.getClassroomId() != null) {
             student.setClassroomId(updatedStudentDto.getClassroomId());
         }
+        
+        if (updatedStudentDto.getStudentCode() != null) {
+            student.setStudentCode(updatedStudentDto.getStudentCode());
+        }
 
         // prevent overwrite null
         if (updatedStudentDto.getFatherName() != null) {

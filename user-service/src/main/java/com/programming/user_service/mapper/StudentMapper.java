@@ -29,6 +29,7 @@ public class StudentMapper {
                 .address(student.getAddress())
                 //.classroomName(student.getClassroom() != null ? student.getClassroom().getName() : null)
                 .classroomId(student.getClassroomId())
+                .studentCode(student.getStudentCode())
                 .build();
     }
 
@@ -40,6 +41,7 @@ public class StudentMapper {
         student.setMotherName(dto.getMotherName());
         student.setMotherPhoneNum(dto.getMotherPhoneNum());
         student.setAddress(dto.getAddress());
+        student.setStudentCode(dto.getStudentCode());
         ///student.setClassroomId(dto.getClassroomId());
         return student;
     }

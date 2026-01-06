@@ -89,11 +89,17 @@ public class ClassroomServiceImpl implements ClassroomService {
         ApiResponse response = studentClient.getStudentById(studentId);
         StudentResponseDto student = objectMapper.convertValue(response.getData(), StudentResponseDto.class);
 
+        // create student code
+        int studentNumber = classroom.getStudentIds().size() + 1;
+        String studentCode = generateStudentCode(classroom.getName(), studentNumber);
+
         classroom.getStudentIds().add(student.getId());
         classroomRepository.save(classroom);
 
+        // Update student with classroomId and studentCode
         StudentRequestDto updatedStudentDto = new StudentRequestDto();
         updatedStudentDto.setClassroomId(classroomId);
+        updatedStudentDto.setStudentCode(studentCode);
 
         studentClient.updateStudent(studentId, updatedStudentDto);
     }
@@ -211,6 +217,31 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         classroom.getCatechistIds().remove(catechistId);
         classroomRepository.save(classroom);
+    }
+
+    // generate student code based on classroom name and student number
+    private String generateStudentCode(String classroomName, int studentNumber) {
+        String[] words = classroomName.trim().toLowerCase().split("\\s+");
+        
+        if (words.length == 0) {
+            throw new IllegalArgumentException("Invalid classroom name: " + classroomName);
+        }
+        
+        StringBuilder codeBuilder = new StringBuilder();
+        
+        codeBuilder.append(String.format("%02d", studentNumber));
+        
+        for (String word : words) {
+            if (word.isEmpty()) continue;
+            
+            if (word.matches("\\d+")) {
+                codeBuilder.append(word);
+            } else {
+                codeBuilder.append(word.charAt(0));
+            }
+        }
+        
+        return codeBuilder.toString();
     }
 
 }
