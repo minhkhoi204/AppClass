@@ -121,13 +121,6 @@ public class AttendanceController {
         return ResponseEntity.ok(new ApiResponse("Success", records));
     }
 
-    @GetMapping("/records/enrollment/{enrollmentId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse> getRecordsByEnrollment(@PathVariable Long enrollmentId) {
-        List<AttendanceRecordResponseDto> records = attendanceService.getRecordsByEnrollment(enrollmentId);
-        return ResponseEntity.ok(new ApiResponse("Success", records));
-    }
-
     @PutMapping("/records/{id}")
     @PreAuthorize("hasAnyRole('HUYNH_TRUONG', 'DU_TRUONG', 'DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> updateRecord(
@@ -142,15 +135,6 @@ public class AttendanceController {
     public ResponseEntity<ApiResponse> deleteRecord(@PathVariable Long id) {
         attendanceService.deleteRecord(id);
         return ResponseEntity.ok(new ApiResponse("Attendance record deleted successfully", null));
-    }
-
-    @GetMapping("/records/check")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse> checkEnrollmentAttended(
-            @RequestParam Long sessionId,
-            @RequestParam Long enrollmentId) {
-        boolean attended = attendanceService.isEnrollmentAttended(sessionId, enrollmentId);
-        return ResponseEntity.ok(new ApiResponse("Success", attended));
     }
 
     // Batch Operations
@@ -193,17 +177,6 @@ public class AttendanceController {
         List<AttendanceSessionResponseDto> sessions = attendanceService.getSessionsWithStatisticsInDateRange(
                 classroomId, startDate, endDate);
         return ResponseEntity.ok(new ApiResponse("Success", sessions));
-    }
-
-    @GetMapping("/reports/frequent-absent")
-    @PreAuthorize("hasAnyRole('HUYNH_TRUONG', 'DU_TRUONG', 'DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
-    public ResponseEntity<ApiResponse> getFrequentAbsentStudents(
-            @RequestParam Long classroomId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(defaultValue = "3") int threshold) {
-        List<Long> enrollmentIds = attendanceService.getFrequentAbsentEnrollments(classroomId, startDate, endDate, threshold);
-        return ResponseEntity.ok(new ApiResponse("Found " + enrollmentIds.size() + " enrollments", enrollmentIds));
     }
 
     @GetMapping("/reports/attendance-rate")
