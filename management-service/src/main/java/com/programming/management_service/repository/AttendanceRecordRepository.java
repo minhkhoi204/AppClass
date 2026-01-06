@@ -15,12 +15,12 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     // each students would have 2 records per day as before and after class
     List<AttendanceRecord> findByAttendanceSessionId(Long attendanceSessionId);
 
-    Optional<AttendanceRecord> findByAttendanceSessionIdAndStudentId(
+    Optional<AttendanceRecord> findByAttendanceSessionIdAndStudentCode(
             Long attendanceSessionId, 
-            Long studentId
+            String studentCode
     );
 
-    List<AttendanceRecord> findByStudentId(Long studentId);
+    List<AttendanceRecord> findByStudentCode(String studentCode);
 
     List<AttendanceRecord> findByAttendanceSessionIdAndStatus(
             Long attendanceSessionId, 
@@ -36,17 +36,17 @@ public interface AttendanceRecordRepository extends JpaRepository<AttendanceReco
     
     long countByAttendanceSessionId(Long attendanceSessionId);
     
-    boolean existsByAttendanceSessionIdAndStudentId(Long attendanceSessionId, Long studentId);
+    boolean existsByAttendanceSessionIdAndStudentCode(Long attendanceSessionId, String studentCode);
     
     void deleteByAttendanceSessionId(Long attendanceSessionId);
     
     // get attendance records of a student in specific sessions
     @Query("SELECT a FROM AttendanceRecord a " +
-           "WHERE a.studentId = :studentId " +
+           "WHERE a.studentCode = :studentCode " +
            "AND a.attendanceSessionId IN :sessionIds " +
            "ORDER BY a.createdAt DESC")
     List<AttendanceRecord> findStudentAttendanceHistory(
-            @Param("studentId") Long studentId,
+            @Param("studentCode") String studentCode,
             @Param("sessionIds") List<Long> sessionIds
     );
 }

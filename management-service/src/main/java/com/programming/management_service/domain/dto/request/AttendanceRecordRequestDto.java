@@ -16,8 +16,8 @@ public class AttendanceRecordRequestDto {
     @NotNull(message = "Attendance session ID is required")
     private Long attendanceSessionId;
     
-    @NotNull(message = "Student ID is required")
-    private Long studentId;
+    @NotNull(message = "Student code is required")
+    private String studentCode;
     
     @NotNull(message = "Attendance status is required")
     private AttendanceStatus status;

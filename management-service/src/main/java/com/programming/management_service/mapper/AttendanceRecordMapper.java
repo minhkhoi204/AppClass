@@ -16,7 +16,7 @@ public class AttendanceRecordMapper {
     public AttendanceRecord toAttendanceRecordEntity(AttendanceRecordRequestDto dto, Long recordedBy) {
         return AttendanceRecord.builder()
                 .attendanceSessionId(dto.getAttendanceSessionId())
-                .studentId(dto.getStudentId())
+                .studentCode(dto.getStudentCode())
                 .status(dto.getStatus())
                 .checkedInTime(dto.getCheckedInTime() != null ? dto.getCheckedInTime() : LocalDateTime.now())
                 .note(dto.getNote())
@@ -29,7 +29,7 @@ public class AttendanceRecordMapper {
         return AttendanceRecordResponseDto.builder()
                 .id(record.getId())
                 .attendanceSessionId(record.getAttendanceSessionId())
-                .studentId(record.getStudentId())
+                .studentCode(record.getStudentCode())
                 .status(record.getStatus())
                 .checkedInTime(record.getCheckedInTime())
                 .note(record.getNote())

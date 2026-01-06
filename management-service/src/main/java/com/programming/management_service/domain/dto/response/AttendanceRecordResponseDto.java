@@ -16,7 +16,7 @@ public class AttendanceRecordResponseDto {
     
     private Long attendanceSessionId;
     
-    private Long studentId;
+    private String studentCode;
     
     private AttendanceStatus status;
     

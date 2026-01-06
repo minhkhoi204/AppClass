@@ -255,7 +255,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                             .startTime(date.atTime(6, 45))
                             .endTime(date.atTime(7, 0))
                             .status(SessionStatus.OPEN)
-                            .note("Điểm danh tham dự thánh lễ")
+                            .note("Mass attendance")
                             .build();
 
                     // Create BEFORE_CLASS session (8:45-9:00)
@@ -266,7 +266,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                             .startTime(date.atTime(8, 45))
                             .endTime(date.atTime(9, 0))
                             .status(SessionStatus.OPEN)
-                            .note("Điểm danh đầu giờ")
+                            .note("Before class attendance")
                             .build();
 
                     // Create AFTER_CLASS session 10:00-10:15)
@@ -277,7 +277,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                             .startTime(date.atTime(10, 0))
                             .endTime(date.atTime(10, 15))
                             .status(SessionStatus.OPEN)
-                            .note("Điểm danh cuối giờ")
+                            .note("After class attendance")
                             .build();
 
                     return List.of(massDto, beforeDto, afterDto).stream()
