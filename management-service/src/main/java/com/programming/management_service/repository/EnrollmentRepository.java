@@ -40,10 +40,39 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByClassroomIdAndStudentIdIn(Long classroomId, List<Long> studentIds);
 
     // student code related
+    
+    @Query("SELECT e.studentId FROM Enrollment e WHERE e.classroomId = :classroomId AND e.academicYear = :academicYear")
+    List<Long> findStudentIdsByClassroomAndYear(
+            @Param("classroomId") Long classroomId, 
+            @Param("academicYear") String academicYear);
+
+    @Modifying
+    @Query("UPDATE Enrollment e SET e.status = :newStatus, e.updatedAt = CURRENT_TIMESTAMP, e.updatedBy = :updatedBy " +
+           "WHERE e.academicYear = :academicYear AND e.status = :currentStatus")
+    int updateStatusByAcademicYear(
+            @Param("academicYear") String academicYear,
+            @Param("currentStatus") EnrollmentStatus currentStatus,
+            @Param("newStatus") EnrollmentStatus newStatus,
+            @Param("updatedBy") Long updatedBy);
+
+    @Modifying
+    @Query("UPDATE Enrollment e SET e.status = :newStatus, e.updatedAt = CURRENT_TIMESTAMP, e.updatedBy = :updatedBy " +
+           "WHERE e.classroomId = :classroomId AND e.academicYear = :academicYear AND e.status = :currentStatus")
+    int updateStatusByClassroomAndYear(
+            @Param("classroomId") Long classroomId,
+            @Param("academicYear") String academicYear,
+            @Param("currentStatus") EnrollmentStatus currentStatus,
+            @Param("newStatus") EnrollmentStatus newStatus,
+            @Param("updatedBy") Long updatedBy);
 
     Optional<Enrollment> findByStudentCodeAndAcademicYear(String studentCode, String academicYear);
 
     boolean existsByStudentCodeAndAcademicYear(String studentCode, String academicYear);
+
+    long countByClassroomIdAndAcademicYearAndStatus(
+            Long classroomId, 
+            String academicYear, 
+            EnrollmentStatus status);
 
     @Query("SELECT CAST(SUBSTRING(e.studentCode, LENGTH(e.studentCode) - 2, 3) AS int) " +
            "FROM Enrollment e " +
@@ -53,25 +82,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Integer> findMaxStudentCodeSequenceByClassroomAndYear(
             @Param("classroomId") Long classroomId,
             @Param("academicYear") String academicYear);
-    
-//    @Modifying
-//    @Query("UPDATE Enrollment e SET e.status = :newStatus, e.updatedAt = CURRENT_TIMESTAMP, e.updatedBy = :updatedBy " +
-//           "WHERE e.academicYear = :academicYear AND e.status = :currentStatus")
-//    int updateStatusByAcademicYear(
-//            @Param("academicYear") String academicYear,
-//            @Param("currentStatus") EnrollmentStatus currentStatus,
-//            @Param("newStatus") EnrollmentStatus newStatus,
-//            @Param("updatedBy") Long updatedBy);
-//
-//    @Modifying
-//    @Query("UPDATE Enrollment e SET e.status = :newStatus, e.updatedAt = CURRENT_TIMESTAMP, e.updatedBy = :updatedBy " +
-//           "WHERE e.classroomId = :classroomId AND e.academicYear = :academicYear AND e.status = :currentStatus")
-//    int updateStatusByClassroomAndYear(
-//            @Param("classroomId") Long classroomId,
-//            @Param("academicYear") String academicYear,
-//            @Param("currentStatus") EnrollmentStatus currentStatus,
-//            @Param("newStatus") EnrollmentStatus newStatus,
-//            @Param("updatedBy") Long updatedBy);
 
     //end of year
 
@@ -80,21 +90,21 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             String academicYear, 
             EnrollmentStatus status);
 
-//    @Query("SELECT e FROM Enrollment e " +
-//           "WHERE e.academicYear = :academicYear " +
-//           "AND e.status IN :statuses " +
-//           "ORDER BY e.classroomId, e.studentCode")
-//    List<Enrollment> findByAcademicYearAndStatusIn(
-//            @Param("academicYear") String academicYear,
-//            @Param("statuses") List<EnrollmentStatus> statuses);
-//    
-//    @Query("SELECT e.status, COUNT(e) FROM Enrollment e " +
-//           "WHERE e.academicYear = :academicYear " +
-//           "GROUP BY e.status")
-//    List<Object[]> countByStatusForAcademicYear(@Param("academicYear") String academicYear);
-//    
-//    @Query("SELECT e.classroomId, e.status, COUNT(e) FROM Enrollment e " +
-//           "WHERE e.academicYear = :academicYear " +
-//           "GROUP BY e.classroomId, e.status")
-//    List<Object[]> countByClassroomAndStatusForAcademicYear(@Param("academicYear") String academicYear);
+    @Query("SELECT e FROM Enrollment e " +
+           "WHERE e.academicYear = :academicYear " +
+           "AND e.status IN :statuses " +
+           "ORDER BY e.classroomId, e.studentCode")
+    List<Enrollment> findByAcademicYearAndStatusIn(
+            @Param("academicYear") String academicYear,
+            @Param("statuses") List<EnrollmentStatus> statuses);
+    
+    @Query("SELECT e.status, COUNT(e) FROM Enrollment e " +
+           "WHERE e.academicYear = :academicYear " +
+           "GROUP BY e.status")
+    List<Object[]> countByStatusForAcademicYear(@Param("academicYear") String academicYear);
+    
+    @Query("SELECT e.classroomId, e.status, COUNT(e) FROM Enrollment e " +
+           "WHERE e.academicYear = :academicYear " +
+           "GROUP BY e.classroomId, e.status")
+    List<Object[]> countByClassroomAndStatusForAcademicYear(@Param("academicYear") String academicYear);
 }
