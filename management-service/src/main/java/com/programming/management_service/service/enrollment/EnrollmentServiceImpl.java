@@ -1,0 +1,138 @@
+package com.programming.management_service.service.enrollment;
+
+import com.programming.common.exception.AlreadyExistsException;
+import com.programming.common.exception.ResourceNotFoundException;
+import com.programming.management_service.domain.dto.request.EnrollmentRequestDto;
+import com.programming.management_service.domain.dto.response.EnrollmentResponseDto;
+import com.programming.management_service.domain.model.Enrollment;
+import com.programming.management_service.domain.model.EnrollmentStatus;
+import com.programming.management_service.repository.EnrollmentRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class EnrollmentServiceImpl implements EnrollmentService {
+    
+    private final EnrollmentRepository enrollmentRepository;
+    
+    @Override
+    @Transactional
+    public EnrollmentResponseDto createEnrollment(EnrollmentRequestDto request) {
+        // Check if enrollment already exists
+        if (enrollmentRepository.existsByStudentIdAndClassroomIdAndAcademicYear(
+                request.getStudentId(), request.getClassroomId(), request.getAcademicYear())) {
+            throw new AlreadyExistsException("Enrollment already exists for this student in this classroom and academic year");
+        }
+        
+        Enrollment enrollment = Enrollment.builder()
+                .studentId(request.getStudentId())
+                .classroomId(request.getClassroomId())
+                .studentCode(request.getStudentCode())
+                .academicYear(request.getAcademicYear())
+                .status(request.getStatus() != null ? request.getStatus() : EnrollmentStatus.ACTIVE)
+                .enrollmentDate(request.getEnrollmentDate() != null ? request.getEnrollmentDate() : LocalDate.now())
+                .completionDate(request.getCompletionDate())
+                .note(request.getNote())
+                .build();
+        
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        return mapToResponseDto(savedEnrollment);
+    }
+    
+    @Override
+    public EnrollmentResponseDto getEnrollmentById(Long id) {
+        Enrollment enrollment = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
+        return mapToResponseDto(enrollment);
+    }
+    
+    @Override
+    public List<EnrollmentResponseDto> getAllEnrollments() {
+        return enrollmentRepository.findAll().stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<EnrollmentResponseDto> getEnrollmentsByStudentId(Long studentId) {
+        return enrollmentRepository.findByStudentId(studentId).stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<EnrollmentResponseDto> getEnrollmentsByClassroomId(Long classroomId) {
+        return enrollmentRepository.findByClassroomId(classroomId).stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<EnrollmentResponseDto> getEnrollmentsByClassroomIdAndYear(Long classroomId, String academicYear) {
+        return enrollmentRepository.findByClassroomIdAndAcademicYear(classroomId, academicYear).stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional
+    public EnrollmentResponseDto updateEnrollment(Long id, EnrollmentRequestDto request) {
+        Enrollment enrollment = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
+        
+        enrollment.setStudentCode(request.getStudentCode());
+        enrollment.setStatus(request.getStatus());
+        enrollment.setEnrollmentDate(request.getEnrollmentDate());
+        enrollment.setCompletionDate(request.getCompletionDate());
+        enrollment.setNote(request.getNote());
+        
+        Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
+        return mapToResponseDto(updatedEnrollment);
+    }
+    
+    @Override
+    @Transactional
+    public EnrollmentResponseDto updateEnrollmentStatus(Long id, EnrollmentStatus status) {
+        Enrollment enrollment = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
+        
+        enrollment.setStatus(status);
+        if (status == EnrollmentStatus.COMPLETED && enrollment.getCompletionDate() == null) {
+            enrollment.setCompletionDate(LocalDate.now());
+        }
+        
+        Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
+        return mapToResponseDto(updatedEnrollment);
+    }
+    
+    @Override
+    @Transactional
+    public void deleteEnrollment(Long id) {
+        if (!enrollmentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Enrollment not found with id: " + id);
+        }
+        enrollmentRepository.deleteById(id);
+    }
+    
+    private EnrollmentResponseDto mapToResponseDto(Enrollment enrollment) {
+        return EnrollmentResponseDto.builder()
+                .id(enrollment.getId())
+                .studentId(enrollment.getStudentId())
+                .classroomId(enrollment.getClassroomId())
+                .studentCode(enrollment.getStudentCode())
+                .academicYear(enrollment.getAcademicYear())
+                .status(enrollment.getStatus())
+                .enrollmentDate(enrollment.getEnrollmentDate())
+                .completionDate(enrollment.getCompletionDate())
+                .note(enrollment.getNote())
+                .createdAt(enrollment.getCreatedAt())
+                .updatedAt(enrollment.getUpdatedAt())
+                .build();
+    }
+}
