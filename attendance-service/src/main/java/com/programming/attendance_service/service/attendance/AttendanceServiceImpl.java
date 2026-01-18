@@ -7,10 +7,12 @@ import com.programming.attendance_service.domain.dto.request.AttendanceSessionRe
 import com.programming.attendance_service.domain.dto.response.AttendanceRecordResponseDto;
 import com.programming.attendance_service.domain.dto.response.AttendanceSessionResponseDto;
 import com.programming.attendance_service.domain.model.*;
+import com.programming.attendance_service.client.ManagementServiceClient;
 import com.programming.attendance_service.mapper.AttendanceRecordMapper;
 import com.programming.attendance_service.mapper.AttendanceSessionMapper;
 import com.programming.attendance_service.repository.AttendanceRecordRepository;
 import com.programming.attendance_service.repository.AttendanceSessionRepository;
+import com.programming.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,14 +32,23 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final AttendanceRecordRepository recordRepository;
     private final AttendanceSessionMapper sessionMapper;
     private final AttendanceRecordMapper recordMapper;
-    // TODO: Add Feign Client for academic-service to validate classroom
+    private final ManagementServiceClient managementServiceClient;
 
     // Session Management
 
     @Override
     @Transactional
     public AttendanceSessionResponseDto createSession(AttendanceSessionRequestDto dto, Long createdBy) {
-        // TODO: Validate classroom exists via Feign Client to academic-service
+        // validate classroom exists via feign to management-service
+        try {
+            ApiResponse response = managementServiceClient.getClassroomById(dto.getClassroomId());
+            if (response.getData() == null) {
+                throw new ResourceNotFoundException("Classroom not found with id: " + dto.getClassroomId());
+            }
+        } catch (Exception e) {
+            log.error("Error validating classroom: {}", e.getMessage());
+            throw new ResourceNotFoundException("Classroom not found with id: " + dto.getClassroomId());
+        }
         
         // Check if session already exists
         if (sessionRepository.existsByClassroomIdAndSessionDateAndSessionType(
@@ -237,9 +249,70 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional
     public List<AttendanceSessionResponseDto> autoCreateSessionsForDate(LocalDate date) {
-        // TODO: Get all classrooms from academic-service via Feign Client
-        // For now, this method is not fully implemented
-        throw new UnsupportedOperationException("Auto-create sessions requires Feign Client integration with academic-service");
+        // Get all classrooms from management-service via Feign Client
+        try {
+            ApiResponse response = managementServiceClient.getAllClassrooms();
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> classrooms = (List<Map<String, Object>>) response.getData();
+            
+            if (classrooms == null || classrooms.isEmpty()) {
+                log.warn("No classrooms found for auto-creating sessions");
+                return List.of();
+            }
+            
+            return classrooms.stream()
+                    .flatMap(classroom -> {
+                        Long classroomId = ((Number) classroom.get("id")).longValue();
+                        
+                        // Create MASS_ATTENDANCE session (6:45-7:00)
+                        AttendanceSessionRequestDto massDto = AttendanceSessionRequestDto.builder()
+                                .classroomId(classroomId)
+                                .sessionDate(date)
+                                .sessionType(SessionType.MASS_ATTENDANCE)
+                                .startTime(date.atTime(6, 45))
+                                .endTime(date.atTime(7, 0))
+                                .status(SessionStatus.OPEN)
+                                .note("Điểm danh tham dự thánh lễ")
+                                .build();
+
+                        // Create BEFORE_CLASS session (8:45-9:00)
+                        AttendanceSessionRequestDto beforeDto = AttendanceSessionRequestDto.builder()
+                                .classroomId(classroomId)
+                                .sessionDate(date)
+                                .sessionType(SessionType.BEFORE_CLASS)
+                                .startTime(date.atTime(8, 45))
+                                .endTime(date.atTime(9, 0))
+                                .status(SessionStatus.OPEN)
+                                .note("Điểm danh đầu giờ")
+                                .build();
+
+                        // Create AFTER_CLASS session 10:00-10:15)
+                        AttendanceSessionRequestDto afterDto = AttendanceSessionRequestDto.builder()
+                                .classroomId(classroomId)
+                                .sessionDate(date)
+                                .sessionType(SessionType.AFTER_CLASS)
+                                .startTime(date.atTime(10, 0))
+                                .endTime(date.atTime(10, 15))
+                                .status(SessionStatus.OPEN)
+                                .note("Điểm danh cuối giờ")
+                                .build();
+
+                        return List.of(massDto, beforeDto, afterDto).stream()
+                                .map(sessionDto -> {
+                                    try {
+                                        return createSession(sessionDto, 1L); // System user
+                                    } catch (Exception e) {
+                                        log.error("Failed to create session for classroom: {}", classroomId, e);
+                                        return null;
+                                    }
+                                })
+                                .filter(session -> session != null);
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error auto-creating sessions: {}", e.getMessage());
+            throw new RuntimeException("Failed to auto-create sessions", e);
+        }
     }
 
     // Statistics & Reports
