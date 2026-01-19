@@ -32,9 +32,4 @@ public class Classroom {
     
     private String note;
 
-    @ElementCollection
-    private Set<Long> studentIds = new HashSet<>();
-    
-    @ElementCollection
-    private Set<Long> catechistIds = new HashSet<>(); 
 }
