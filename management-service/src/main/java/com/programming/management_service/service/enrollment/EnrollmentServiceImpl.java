@@ -7,7 +7,9 @@ import com.programming.management_service.domain.dto.response.EnrollmentResponse
 import com.programming.management_service.domain.model.Enrollment;
 import com.programming.management_service.domain.model.EnrollmentStatus;
 import com.programming.management_service.repository.EnrollmentRepository;
+import com.programming.management_service.service.code.StudentCodeGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,23 +19,38 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EnrollmentServiceImpl implements EnrollmentService {
     
     private final EnrollmentRepository enrollmentRepository;
+    private final StudentCodeGenerator studentCodeGenerator;
     
     @Override
     @Transactional
     public EnrollmentResponseDto createEnrollment(EnrollmentRequestDto request) {
-        // Check if enrollment already exists
+        // if enrollment already exists
         if (enrollmentRepository.existsByStudentIdAndClassroomIdAndAcademicYear(
                 request.getStudentId(), request.getClassroomId(), request.getAcademicYear())) {
             throw new AlreadyExistsException("Enrollment already exists for this student in this classroom and academic year");
         }
         
+        // optional generated later in batch
+        String studentCode = request.getStudentCode();
+        if (studentCode != null && !studentCode.trim().isEmpty()) {
+            if (!studentCodeGenerator.isValidStudentCodeFormat(studentCode)) {
+                throw new IllegalArgumentException("Invalid student code format: " + studentCode);
+            }
+            
+            // if student code already exists for this year
+            if (enrollmentRepository.existsByStudentCodeAndAcademicYear(studentCode, request.getAcademicYear())) {
+                throw new AlreadyExistsException("Student code already exists: " + studentCode + " for year: " + request.getAcademicYear());
+            }
+        }
+        
         Enrollment enrollment = Enrollment.builder()
                 .studentId(request.getStudentId())
                 .classroomId(request.getClassroomId())
-                .studentCode(request.getStudentCode())
+                .studentCode(studentCode)
                 .academicYear(request.getAcademicYear())
                 .status(request.getStatus() != null ? request.getStatus() : EnrollmentStatus.ACTIVE)
                 .enrollmentDate(request.getEnrollmentDate() != null ? request.getEnrollmentDate() : LocalDate.now())
@@ -42,6 +59,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .build();
         
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        log.info("Created enrollment for studentId: {}, classroomId: {} without student code. Will be generated in batch.", 
+                request.getStudentId(), request.getClassroomId());
         return mapToResponseDto(savedEnrollment);
     }
     
@@ -118,6 +137,21 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new ResourceNotFoundException("Enrollment not found with id: " + id);
         }
         enrollmentRepository.deleteById(id);
+    }
+    
+    @Override
+    public EnrollmentResponseDto getEnrollmentByStudentCode(String studentCode) {
+        Enrollment enrollment = enrollmentRepository.findByStudentCode(studentCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with student code: " + studentCode));
+        return mapToResponseDto(enrollment);
+    }
+    
+    @Override
+    public EnrollmentResponseDto getEnrollmentByStudentCodeAndYear(String studentCode, String academicYear) {
+        Enrollment enrollment = enrollmentRepository.findByStudentCodeAndAcademicYear(studentCode, academicYear)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Enrollment not found with student code: " + studentCode + " and year: " + academicYear));
+        return mapToResponseDto(enrollment);
     }
     
     private EnrollmentResponseDto mapToResponseDto(Enrollment enrollment) {

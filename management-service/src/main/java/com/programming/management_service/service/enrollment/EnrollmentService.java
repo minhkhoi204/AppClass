@@ -25,4 +25,9 @@ public interface EnrollmentService {
     EnrollmentResponseDto updateEnrollmentStatus(Long id, EnrollmentStatus status);
     
     void deleteEnrollment(Long id);
+    
+
+    EnrollmentResponseDto getEnrollmentByStudentCode(String studentCode);
+    
+    EnrollmentResponseDto getEnrollmentByStudentCodeAndYear(String studentCode, String academicYear);
 }
