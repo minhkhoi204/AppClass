@@ -22,7 +22,7 @@ public class EnrollmentRequestDto {
     @NotNull(message = "Classroom ID is required")
     private Long classroomId;
     
-    @NotBlank(message = "Student code is required")
+    //optional
     private String studentCode;
     
     @NotBlank(message = "Academic year is required")
