@@ -43,7 +43,8 @@ public class Enrollment {
     @Column(name = "classroom_id", nullable = false)
     private Long classroomId;
     
-    @Column(name = "student_code", nullable = false, length = 20)
+    // will be generated in batch after classroom is stable
+    @Column(name = "student_code", nullable = true, length = 20)
     private String studentCode;
 
     @Column(name = "academic_year", nullable = false, length = 20)
