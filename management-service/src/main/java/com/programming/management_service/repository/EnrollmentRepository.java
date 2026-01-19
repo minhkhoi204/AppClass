@@ -24,4 +24,15 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByClassroomIdAndStatus(Long classroomId, EnrollmentStatus status);
     
     boolean existsByStudentIdAndClassroomIdAndAcademicYear(Long studentId, Long classroomId, String academicYear);
+    
+    Optional<Enrollment> findByStudentCode(String studentCode);
+    
+    Optional<Enrollment> findByStudentCodeAndAcademicYear(String studentCode, String academicYear);
+    
+    boolean existsByStudentCode(String studentCode);
+    
+    boolean existsByStudentCodeAndAcademicYear(String studentCode, String academicYear);
+    
+    // Lấy sequence number cuối cùng trong lớp (để generate code tiếp theo)
+    List<Enrollment> findByClassroomIdAndAcademicYearOrderByStudentCodeAsc(Long classroomId, String academicYear);
 }
