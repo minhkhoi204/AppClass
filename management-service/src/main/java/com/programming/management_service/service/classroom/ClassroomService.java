@@ -13,12 +13,20 @@ public interface ClassroomService {
 
     ClassroomResponseDto updateClassroom(Long id, ClassroomRequestDto requestDto);
 
-    void addStudentToClassroom(Long classroomId, Long studentId);
+    // void addStudentToClassroom(Long classroomId, Long studentId);
     
-    void removeStudentFromClassroom(Long classroomId, Long studentId);
+    // void removeStudentFromClassroom(Long classroomId, Long studentId);
     
-    void addCatechistToClassroom(Long classroomId, Long catechistId);
+    // void addCatechistToClassroom(Long classroomId, Long catechistId);
     
-    void removeCatechistFromClassroom(Long classroomId, Long catechistId);
+    // void removeCatechistFromClassroom(Long classroomId, Long catechistId);
+
+    List<Long> getStudentIds(Long classroomId, String academicYear);
+
+    List<Long> getCatechistIds(Long classroomId, String academicYear);
+
+    int getStudentCount(Long classroomId, String academicYear);
+    
+    int getCatechistCount(Long classroomId, String academicYear);
 
 }

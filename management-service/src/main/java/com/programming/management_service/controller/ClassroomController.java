@@ -34,6 +34,7 @@ public class ClassroomController {
                 .body(new ApiResponse("Classroom created successfully", responseDto));
     }
 
+    /*
     @PostMapping("/{classroomId}/students/{studentId}/add")
     @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI', 'THU_KY')")
     public ResponseEntity<ApiResponse> addStudentToClassroom(@PathVariable Long classroomId,
@@ -49,7 +50,9 @@ public class ClassroomController {
         classroomService.removeStudentFromClassroom(classroomId, studentId);
         return ResponseEntity.ok(new ApiResponse("Student removed from classroom successfully", null));
     }
+    */
 
+    /*
     @PostMapping("/{classroomId}/catechists/{catechistId}/add")
     @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> addCatechistToClassroom(@PathVariable Long classroomId,
@@ -65,6 +68,7 @@ public class ClassroomController {
         classroomService.removeCatechistFromClassroom(classroomId, catechistId);
         return ResponseEntity.ok(new ApiResponse("Catechist removed from classroom successfully", null));
     }
+    */
 
     @GetMapping("/{classroomId}")
     @PreAuthorize("isAuthenticated()")
