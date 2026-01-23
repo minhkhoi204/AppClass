@@ -7,7 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import com.programming.management_service.domain.enums.AssignmentStatus;
 
 @Entity
 @Table(name = "classroom_assignment",
