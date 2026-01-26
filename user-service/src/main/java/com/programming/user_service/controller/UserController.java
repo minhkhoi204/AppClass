@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Set;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -27,6 +30,13 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
+    }
+    
+    // get multiple users by ids
+    @GetMapping("/batch")
+    public ResponseEntity<List<UserResponseDto>> getUsersByIds(@RequestParam("ids") Set<Long> ids) {
+        List<UserResponseDto> users = userService.getUsersByIds(ids);
+        return ResponseEntity.ok(users);
     }
 
     // create user
