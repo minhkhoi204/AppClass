@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Collator;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -99,6 +100,10 @@ public class BatchStudentCodeService {
         
         // sort enrollments by student fullName (alphabet - Vietnamese standard)
         // Priority: (last name) → (middle) → (first)
+        // using collator
+        Collator viCollator = Collator.getInstance(new Locale("vi", "VN"));
+        viCollator.setStrength(Collator.TERTIARY);
+        
         List<EnrollmentWithStudent> enrollmentWithStudents = enrollmentsToProcess.stream()
                 .map(e -> {
                     StudentResponseDto student = studentMap.get(e.getStudentId());
@@ -109,7 +114,19 @@ public class BatchStudentCodeService {
                     return new EnrollmentWithStudent(e, student);
                 })
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparing(ews -> createVietnameseSortKey(ews.getStudent().getFullName())))
+                .sorted((ews1, ews2) -> {
+                    String name1 = ews1.getStudent().getFullName();
+                    String name2 = ews2.getStudent().getFullName();
+                    
+                    String lastName1 = getLastName(name1);
+                    String lastName2 = getLastName(name2);
+                    
+                    int cmp = viCollator.compare(lastName1, lastName2);
+                    if (cmp != 0) return cmp;
+                    
+                    // compare full names if last names are equal
+                    return viCollator.compare(name1, name2);
+                })
                 .collect(Collectors.toList());
         
         // generate student codes sequentially
@@ -152,50 +169,59 @@ public class BatchStudentCodeService {
                 .generatedCodes(generatedCodes)
                 .build();
     }
-    /**
-    create sort key
-    seperate each part by |
-     */
-    private String createVietnameseSortKey(String fullName) {
+
+    
+    // extract last name from full name
+    private String getLastName(String fullName) {
         if (fullName == null || fullName.trim().isEmpty()) {
             return "";
         }
-        
-        String normalized = normalizeVietnamese(fullName);
-        
-        String[] parts = normalized.split("\\s+");
-        
-        if (parts.length == 0) {
-            return "";
-        }
-        
-        if (parts.length == 1) {
-            return parts[0];
-        }
-        
-        StringBuilder sortKey = new StringBuilder();
-        
-        String ten = parts[parts.length - 1];
-        sortKey.append(ten);
-        
-        for (int i = parts.length - 2; i >= 1; i--) {
-            sortKey.append("|");
-            sortKey.append(parts[i]);
-        }
-
-        sortKey.append("|");
-        sortKey.append(parts[0]);
-        
-        return sortKey.toString();
+        String[] parts = fullName.trim().split("\\s+");
+        return parts[parts.length - 1];
     }
     
-    private String normalizeVietnamese(String input) {
-        if (input == null) return "";
+    // @Deprecated
+    // private String createVietnameseSortKey(String fullName) {
+    //     if (fullName == null || fullName.trim().isEmpty()) {
+    //         return "";
+    //     }
         
-        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
-        normalized = normalized.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-        return normalized.toLowerCase().trim();
-    }
+    //     String normalized = normalizeVietnamese(fullName);
+        
+    //     String[] parts = normalized.split("\\s+");
+        
+    //     if (parts.length == 0) {
+    //         return "";
+    //     }
+        
+    //     if (parts.length == 1) {
+    //         return parts[0];
+    //     }
+        
+    //     StringBuilder sortKey = new StringBuilder();
+        
+    //     String ten = parts[parts.length - 1];
+    //     sortKey.append(ten);
+        
+    //     for (int i = parts.length - 2; i >= 1; i--) {
+    //         sortKey.append("|");
+    //         sortKey.append(parts[i]);
+    //     }
+
+    //     sortKey.append("|");
+    //     sortKey.append(parts[0]);
+        
+    //     return sortKey.toString();
+    // }
+    
+    // @Deprecated
+    // private String normalizeVietnamese(String input) {
+    //     if (input == null) return "";
+        
+    //     String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+    //     normalized = normalized.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+    //     return normalized.toLowerCase().trim();
+    // }
 
     private static class EnrollmentWithStudent {
         private final Enrollment enrollment;
