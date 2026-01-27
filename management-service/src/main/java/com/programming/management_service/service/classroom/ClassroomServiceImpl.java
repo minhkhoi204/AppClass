@@ -256,4 +256,53 @@ public class ClassroomServiceImpl implements ClassroomService {
         return count != null ? count : 0;
     }
 
+    @Override
+    public List<StudentResponseDto> getStudentsInClassroom(Long classroomId, String academicYear) {
+        classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + classroomId));
+        
+        // get student ids from enrollments
+        List<Long> studentIds = enrollmentRepository.findByClassroomIdAndAcademicYear(classroomId, academicYear)
+                .stream()
+                .map(enrollment -> enrollment.getStudentId())
+                .collect(Collectors.toList());
+        
+        if (studentIds.isEmpty()) {
+            return List.of();
+        }
+        
+        ApiResponse response = studentClient.getStudentsByIds(studentIds);
+        List<Object> dataList = (List<Object>) response.getData();
+        
+        return dataList.stream()
+                .map(data -> objectMapper.convertValue(data, StudentResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CatechistResponseDto> getCatechistsInClassroom(Long classroomId, String academicYear) {
+        // get catechist ids from assignments
+        List<Long> catechistIds = assignmentRepository
+                .findByClassroomIdAndAcademicYearAndStatus(classroomId, academicYear, AssignmentStatus.ACTIVE)
+                .stream()
+                .map(assignment -> assignment.getCatechistId())
+                .collect(Collectors.toList());
+        List<Long> catechistIds = assignmentRepository
+                .findByClassroomIdAndAcademicYearAndStatus(classroomId, academicYear, AssignmentStatus.ACTIVE)
+                .stream()
+                .map(assignment -> assignment.getCatechistId())
+                .collect(Collectors.toList());
+        
+        if (catechistIds.isEmpty()) {
+            return List.of();
+        }
+        
+        ApiResponse response = catechistClient.getCatechistsByIds(catechistIds);
+        List<Object> dataList = (List<Object>) response.getData();
+        
+        return dataList.stream()
+                .map(data -> objectMapper.convertValue(data, CatechistResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
 }

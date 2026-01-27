@@ -1,5 +1,7 @@
 package com.programming.management_service.service.classroom;
 
+import com.programming.common.common_dto.catechist.CatechistResponseDto;
+import com.programming.common.common_dto.student.StudentResponseDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
 import com.programming.management_service.domain.model.Classroom;
@@ -28,5 +30,9 @@ public interface ClassroomService {
     int getStudentCount(Long classroomId, String academicYear);
     
     int getCatechistCount(Long classroomId, String academicYear);
+
+    List<StudentResponseDto> getStudentsInClassroom(Long classroomId, String academicYear);
+    
+    List<CatechistResponseDto> getCatechistsInClassroom(Long classroomId, String academicYear);
 
 }

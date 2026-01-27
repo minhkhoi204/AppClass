@@ -1,5 +1,7 @@
 package com.programming.management_service.controller;
 
+import com.programming.common.common_dto.catechist.CatechistResponseDto;
+import com.programming.common.common_dto.student.StudentResponseDto;
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import com.programming.management_service.mapper.ClassroomMapper;
@@ -83,6 +85,28 @@ public class ClassroomController {
                                                        @RequestBody ClassroomRequestDto classroomRequestDto) {
         ClassroomResponseDto updated = classroomService.updateClassroom(classroomId, classroomRequestDto);
         return ResponseEntity.ok(new ApiResponse("Classroom updated successfully", updated));
+    }
+
+    // get all students in a classroom
+    @GetMapping("/{classroomId}/students")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<StudentResponseDto>>> getStudentsInClassroom(
+            @PathVariable Long classroomId,
+            @RequestParam String academicYear) {
+        List<StudentResponseDto> students = classroomService.getStudentsInClassroom(classroomId, academicYear);
+        return ResponseEntity.ok(ApiResponse.success(students, 
+                "Found " + students.size() + " student(s) in classroom"));
+    }
+
+    // get all catechists in a classroom
+    @GetMapping("/{classroomId}/catechists")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<CatechistResponseDto>>> getCatechistsInClassroom(
+            @PathVariable Long classroomId,
+            @RequestParam String academicYear) {
+        List<CatechistResponseDto> catechists = classroomService.getCatechistsInClassroom(classroomId, academicYear);
+        return ResponseEntity.ok(ApiResponse.success(catechists, 
+                "Found " + catechists.size() + " catechist(s) in classroom"));
     }
 
 }
