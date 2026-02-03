@@ -82,11 +82,6 @@ public class TransitionMapper {
                 .orElse("Unknown");
     }
     
-    /**
-     * Helper: Get student name by ID from user-service
-     * 
-     * Fetch real student name, fallback to "Student {id}" if failed
-     */
     private String getStudentName(Long studentId) {
         try {
             return userClient.getUserById(studentId).getName();
