@@ -8,6 +8,7 @@ import com.programming.management_service.domain.model.Enrollment;
 import com.programming.management_service.domain.model.EnrollmentStatus;
 import com.programming.management_service.repository.EnrollmentRepository;
 import com.programming.management_service.service.code.StudentCodeGenerator;
+import com.programming.management_service.mapper.EnrollmentMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     
     private final EnrollmentRepository enrollmentRepository;
     private final StudentCodeGenerator studentCodeGenerator;
+    private final EnrollmentMapper enrollmentMapper;
     
     @Override
     @Transactional
@@ -61,41 +63,41 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         log.info("Created enrollment for studentId: {}, classroomId: {} without student code. Will be generated in batch.", 
                 request.getStudentId(), request.getClassroomId());
-        return mapToResponseDto(savedEnrollment);
+        return enrollmentMapper.toResponseDto(savedEnrollment);
     }
     
     @Override
     public EnrollmentResponseDto getEnrollmentById(Long id) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
-        return mapToResponseDto(enrollment);
+        return enrollmentMapper.toResponseDto(enrollment);
     }
     
     @Override
     public List<EnrollmentResponseDto> getAllEnrollments() {
         return enrollmentRepository.findAll().stream()
-                .map(this::mapToResponseDto)
+                .map(enrollmentMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
     
     @Override
     public List<EnrollmentResponseDto> getEnrollmentsByStudentId(Long studentId) {
         return enrollmentRepository.findByStudentId(studentId).stream()
-                .map(this::mapToResponseDto)
+                .map(enrollmentMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
     
     @Override
     public List<EnrollmentResponseDto> getEnrollmentsByClassroomId(Long classroomId) {
         return enrollmentRepository.findByClassroomId(classroomId).stream()
-                .map(this::mapToResponseDto)
+                .map(enrollmentMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
     
     @Override
     public List<EnrollmentResponseDto> getEnrollmentsByClassroomIdAndYear(Long classroomId, String academicYear) {
         return enrollmentRepository.findByClassroomIdAndAcademicYear(classroomId, academicYear).stream()
-                .map(this::mapToResponseDto)
+                .map(enrollmentMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
     
@@ -143,7 +145,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public EnrollmentResponseDto getEnrollmentByStudentCode(String studentCode) {
         Enrollment enrollment = enrollmentRepository.findByStudentCode(studentCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with student code: " + studentCode));
-        return mapToResponseDto(enrollment);
+        return enrollmentMapper.toResponseDto(enrollment);
     }
     
     @Override
@@ -151,22 +153,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment enrollment = enrollmentRepository.findByStudentCodeAndAcademicYear(studentCode, academicYear)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Enrollment not found with student code: " + studentCode + " and year: " + academicYear));
-        return mapToResponseDto(enrollment);
+        return enrollmentMapper.toResponseDto(enrollment);
     }
     
-    private EnrollmentResponseDto mapToResponseDto(Enrollment enrollment) {
-        return EnrollmentResponseDto.builder()
-                .id(enrollment.getId())
-                .studentId(enrollment.getStudentId())
-                .classroomId(enrollment.getClassroomId())
-                .studentCode(enrollment.getStudentCode())
-                .academicYear(enrollment.getAcademicYear())
-                .status(enrollment.getStatus())
-                .enrollmentDate(enrollment.getEnrollmentDate())
-                .completionDate(enrollment.getCompletionDate())
-                .note(enrollment.getNote())
-                .createdAt(enrollment.getCreatedAt())
-                .updatedAt(enrollment.getUpdatedAt())
-                .build();
-    }
 }
