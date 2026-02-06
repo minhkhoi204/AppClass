@@ -84,7 +84,7 @@ public class TransitionMapper {
     
     private String getStudentName(Long studentId) {
         try {
-            return userClient.getUserById(studentId).getName();
+            return userClient.getUserById(studentId).getFullName();
         } catch (Exception e) {
             log.warn("Failed to fetch student name for studentId: {}. Error: {}", 
                     studentId, e.getMessage());
