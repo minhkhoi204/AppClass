@@ -35,6 +35,12 @@ public class ExceptionHandling {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(e.getMessage(), null));
     }
 
+    @ExceptionHandler({IllegalArgumentException.class})
+    public ResponseEntity<ApiResponse> handleIllegalArgument(IllegalArgumentException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(e.getMessage(), null));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleGeneral(Exception e) {
         log.error("Unhandled error: ", e);
