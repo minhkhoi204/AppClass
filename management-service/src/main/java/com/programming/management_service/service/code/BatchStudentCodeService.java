@@ -1,7 +1,9 @@
 package com.programming.management_service.service.code;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.programming.common.common_dto.student.StudentResponseDto;
 import com.programming.common.exception.ResourceNotFoundException;
+import com.programming.common.response.ApiResponse;
 import com.programming.management_service.domain.model.Classroom;
 import com.programming.management_service.domain.model.Enrollment;
 import com.programming.management_service.management_caller.StudentClient;
@@ -20,7 +22,6 @@ import java.util.stream.Collectors;
 /**
 service for generating student codes in batch for enrollments in a classroom
 after enrollments have been created, confirmed stable
-
  */
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class BatchStudentCodeService {
     private final ClassroomRepository classroomRepository;
     private final StudentCodeGenerator studentCodeGenerator;
     private final StudentClient studentClient;
+    private final ObjectMapper objectMapper;
     
     //generate codes in alphabet order in a year
     @Transactional
@@ -38,9 +40,6 @@ public class BatchStudentCodeService {
             Long classroomId, 
             String academicYear, 
             boolean forceRegenerate) {
-        
-        log.info("Starting batch code generation for classroomId: {}, year: {}, force: {}", 
-                classroomId, academicYear, forceRegenerate);
         
         // classroom exists
         Classroom classroom = classroomRepository.findById(classroomId)
@@ -51,7 +50,6 @@ public class BatchStudentCodeService {
                 .findByClassroomIdAndAcademicYearOrderByStudentCodeAsc(classroomId, academicYear);
         
         if (enrollments.isEmpty()) {
-            log.warn("No enrollments found for classroomId: {}, year: {}", classroomId, academicYear);
             return BatchGenerateResult.builder()
                     .classroomId(classroomId)
                     .classroomName(classroom.getName())
@@ -76,7 +74,6 @@ public class BatchStudentCodeService {
         }
         
         if (enrollmentsToProcess.isEmpty()) {
-            log.info("All enrollments already have student codes. Use forceRegenerate=true to regenerate.");
             return BatchGenerateResult.builder()
                     .classroomId(classroomId)
                     .classroomName(classroom.getName())
@@ -88,11 +85,23 @@ public class BatchStudentCodeService {
         }
         
         // get student information from user-service
-        Set<Long> studentIds = enrollmentsToProcess.stream()
+        List<Long> studentIds = enrollmentsToProcess.stream()
                 .map(Enrollment::getStudentId)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         
         List<StudentResponseDto> students = studentClient.getStudentsByIds(studentIds);
+        
+        if (students.isEmpty()) {
+            log.error("No students returned from user-service for IDs: {}", studentIds);
+            return BatchGenerateResult.builder()
+                    .classroomId(classroomId)
+                    .classroomName(classroom.getName())
+                    .academicYear(academicYear)
+                    .totalEnrollments(enrollments.size())
+                    .generatedCount(0)
+                    .skippedCount(enrollmentsToProcess.size())
+                    .build();
+        }
         
         // create map for easy lookup
         Map<Long, StudentResponseDto> studentMap = students.stream()
@@ -129,8 +138,24 @@ public class BatchStudentCodeService {
                 })
                 .collect(Collectors.toList());
         
+        // determine starting sequence number
+        // ff there are existing codes, start from max sequence + 1
+        int startSequence = 1;
+        
+        if (skippedCount > 0) {
+            // find max sequence from existing codes
+            int maxExistingSequence = enrollments.stream()
+                    .filter(e -> e.getStudentCode() != null && !e.getStudentCode().trim().isEmpty())
+                    .map(e -> extractSequenceFromCode(e.getStudentCode()))
+                    .filter(seq -> seq > 0)
+                    .max(Integer::compare)
+                    .orElse(0);
+            
+            startSequence = maxExistingSequence + 1;
+        }
+        
         // generate student codes sequentially
-        int sequence = 1;
+        int sequence = startSequence;
         List<String> generatedCodes = new ArrayList<>();
         
         for (EnrollmentWithStudent ews : enrollmentWithStudents) {
@@ -148,16 +173,8 @@ public class BatchStudentCodeService {
                     ews.getStudent().getFullName(), 
                     studentCode));
             
-            log.info("Generated code: {} for student: {} ({})", 
-                    studentCode, 
-                    ews.getStudent().getFullName(), 
-                    ews.getStudent().getId());
-            
             sequence++;
         }
-        
-        log.info("Batch code generation completed. Generated {} codes for classroom: {}", 
-                enrollmentWithStudents.size(), classroom.getName());
         
         return BatchGenerateResult.builder()
                 .classroomId(classroomId)
@@ -171,13 +188,61 @@ public class BatchStudentCodeService {
     }
 
     
-    // extract last name from full name
+    @lombok.Data
+    @lombok.Builder
+    public static class BatchGenerateResult {
+        private Long classroomId;
+        private String classroomName;
+        private String academicYear;
+        private Integer totalEnrollments;
+        private Integer generatedCount;
+        private Integer skippedCount;
+        private List<String> generatedCodes; // for display/logging
+    }
+    
+    // wrap enrollment with student info, use only internally for sorting name
+    private static class EnrollmentWithStudent {
+        private final Enrollment enrollment;
+        private final StudentResponseDto student;
+        
+        public EnrollmentWithStudent(Enrollment enrollment, StudentResponseDto student) {
+            this.enrollment = enrollment;
+            this.student = student;
+        }
+        
+        public Enrollment getEnrollment() {
+            return enrollment;
+        }
+        
+        public StudentResponseDto getStudent() {
+            return student;
+        }
+    }
+    
+    // private helper
     private String getLastName(String fullName) {
         if (fullName == null || fullName.trim().isEmpty()) {
             return "";
         }
         String[] parts = fullName.trim().split("\\s+");
         return parts[parts.length - 1];
+    }
+    
+    private int extractSequenceFromCode(String studentCode) {
+        if (studentCode == null || studentCode.trim().isEmpty()) {
+            return 0;
+        }
+        
+        try {
+            String[] parts = studentCode.split("-");
+            if (parts.length >= 4) {
+                return Integer.parseInt(parts[3]);
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Cannot extract sequence from code: {}", studentCode);
+        }
+        
+        return 0;
     }
     
     // @Deprecated
@@ -222,34 +287,4 @@ public class BatchStudentCodeService {
     //     normalized = normalized.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
     //     return normalized.toLowerCase().trim();
     // }
-
-    private static class EnrollmentWithStudent {
-        private final Enrollment enrollment;
-        private final StudentResponseDto student;
-        
-        public EnrollmentWithStudent(Enrollment enrollment, StudentResponseDto student) {
-            this.enrollment = enrollment;
-            this.student = student;
-        }
-        
-        public Enrollment getEnrollment() {
-            return enrollment;
-        }
-        
-        public StudentResponseDto getStudent() {
-            return student;
-        }
-    }
-
-    @lombok.Data
-    @lombok.Builder
-    public static class BatchGenerateResult {
-        private Long classroomId;
-        private String classroomName;
-        private String academicYear;
-        private Integer totalEnrollments;
-        private Integer generatedCount;
-        private Integer skippedCount;
-        private List<String> generatedCodes; // For display/logging
-    }
 }
