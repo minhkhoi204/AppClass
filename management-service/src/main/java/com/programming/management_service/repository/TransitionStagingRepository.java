@@ -44,4 +44,13 @@ public interface TransitionStagingRepository extends JpaRepository<TransitionSta
             Long oldClassroomId, 
             String oldAcademicYear, 
             Boolean isFinalized);
+    
+    List<TransitionStaging> findByOldAcademicYearAndIsFinalized(
+            String oldAcademicYear, 
+            Boolean isFinalized);
+    
+    List<TransitionStaging> findByOldClassroomIdInAndOldAcademicYearAndIsFinalized(
+            List<Long> oldClassroomIds, 
+            String oldAcademicYear, 
+            Boolean isFinalized);
 }
