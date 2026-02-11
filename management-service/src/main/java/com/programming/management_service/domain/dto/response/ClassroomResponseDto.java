@@ -16,6 +16,9 @@ public class ClassroomResponseDto {
     //private Integer maxStudents;
     private String schedule;
     private String note;
+    private Integer classOrder;
+    private String nextClassroomName;
+    private Boolean isFinalClass;
 
     private Set<Long> studentIds;
     private Set<Long> catechistIds;
