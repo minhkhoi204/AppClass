@@ -47,8 +47,8 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Override
     public ClassroomResponseDto createClassroom(ClassroomRequestDto dto) {
-        if (classroomRepository.existsByName(dto.getName())) {
-            throw new AlreadyExistsException("Classroom: '" + dto.getName() + "' already exists");
+        if (!classroomRepository.findByNameAndAcademicYear(dto.getName(), dto.getAcademicYear()).isEmpty()) {
+            throw new AlreadyExistsException("Classroom: '" + dto.getName() + "' already exists for academic year: " + dto.getAcademicYear());
         }
 
         Classroom classroom = classroomMapper.toClassroomEntity(dto);
@@ -270,13 +270,15 @@ public class ClassroomServiceImpl implements ClassroomService {
         if (studentIds.isEmpty()) {
             return List.of();
         }
-        
-        ApiResponse response = studentClient.getStudentsByIds(studentIds);
+        /*
+         ApiResponse response = studentClient.getStudentsByIds(new HashSet<>(studentIds));
         List<Object> dataList = (List<Object>) response.getData();
-        
         return dataList.stream()
                 .map(data -> objectMapper.convertValue(data, StudentResponseDto.class))
                 .collect(Collectors.toList());
+        */
+        //return studentClient.getStudentsByIds(new HashSet<>(studentIds));
+        return studentClient.getStudentsByIds(studentIds);
     }
 
     @Override
@@ -287,22 +289,19 @@ public class ClassroomServiceImpl implements ClassroomService {
                 .stream()
                 .map(assignment -> assignment.getCatechistId())
                 .collect(Collectors.toList());
-        List<Long> catechistIds = assignmentRepository
-                .findByClassroomIdAndAcademicYearAndStatus(classroomId, academicYear, AssignmentStatus.ACTIVE)
-                .stream()
-                .map(assignment -> assignment.getCatechistId())
-                .collect(Collectors.toList());
         
         if (catechistIds.isEmpty()) {
             return List.of();
         }
-        
-        ApiResponse response = catechistClient.getCatechistsByIds(catechistIds);
+        /*
+        ApiResponse response = studentClient.getStudentsByIds(new HashSet<>(studentIds));
         List<Object> dataList = (List<Object>) response.getData();
-        
         return dataList.stream()
-                .map(data -> objectMapper.convertValue(data, CatechistResponseDto.class))
-                .collect(Collectors.toList());
-    }
+                .map(data -> objectMapper.convertValue(data, StudentResponseDto.class))
 
+                .collect(Collectors.toList());
+        */
+        //return catechistClient.getCatechistsByIds(new HashSet<>(catechistIds));
+        return catechistClient.getCatechistsByIds(catechistIds);
+    }
 }
