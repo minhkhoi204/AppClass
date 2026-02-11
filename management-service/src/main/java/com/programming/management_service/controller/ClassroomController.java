@@ -90,23 +90,23 @@ public class ClassroomController {
     // get all students in a classroom
     @GetMapping("/{classroomId}/students")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<StudentResponseDto>>> getStudentsInClassroom(
+    public ResponseEntity<ApiResponse> getStudentsInClassroom(
             @PathVariable Long classroomId,
             @RequestParam String academicYear) {
         List<StudentResponseDto> students = classroomService.getStudentsInClassroom(classroomId, academicYear);
-        return ResponseEntity.ok(ApiResponse.success(students, 
-                "Found " + students.size() + " student(s) in classroom"));
+        return ResponseEntity.ok(new ApiResponse(
+                "Found " + students.size() + " student(s) in classroom", students));
     }
 
     // get all catechists in a classroom
     @GetMapping("/{classroomId}/catechists")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<CatechistResponseDto>>> getCatechistsInClassroom(
+    public ResponseEntity<ApiResponse> getCatechistsInClassroom(
             @PathVariable Long classroomId,
             @RequestParam String academicYear) {
         List<CatechistResponseDto> catechists = classroomService.getCatechistsInClassroom(classroomId, academicYear);
-        return ResponseEntity.ok(ApiResponse.success(catechists, 
-                "Found " + catechists.size() + " catechist(s) in classroom"));
+        return ResponseEntity.ok(new ApiResponse(
+                "Found " + catechists.size() + " catechist(s) in classroom", catechists));
     }
 
 }
