@@ -4,8 +4,10 @@ import com.programming.common.exception.AlreadyExistsException;
 import com.programming.common.exception.ResourceNotFoundException;
 import com.programming.management_service.domain.dto.request.EnrollmentRequestDto;
 import com.programming.management_service.domain.dto.response.EnrollmentResponseDto;
+import com.programming.management_service.domain.model.Classroom;
 import com.programming.management_service.domain.model.Enrollment;
 import com.programming.management_service.domain.model.EnrollmentStatus;
+import com.programming.management_service.repository.ClassroomRepository;
 import com.programming.management_service.repository.EnrollmentRepository;
 import com.programming.management_service.service.code.StudentCodeGenerator;
 import com.programming.management_service.mapper.EnrollmentMapper;
@@ -24,12 +26,23 @@ import java.util.stream.Collectors;
 public class EnrollmentServiceImpl implements EnrollmentService {
     
     private final EnrollmentRepository enrollmentRepository;
+    private final ClassroomRepository classroomRepository;
     private final StudentCodeGenerator studentCodeGenerator;
     private final EnrollmentMapper enrollmentMapper;
     
     @Override
     @Transactional
     public EnrollmentResponseDto createEnrollment(EnrollmentRequestDto request) {
+        // validate classroom exists for the specified academic year
+        Classroom classroom = classroomRepository.findById(request.getClassroomId())
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + request.getClassroomId()));
+        
+        if (!classroom.getAcademicYear().equals(request.getAcademicYear())) {
+            throw new IllegalArgumentException(
+                String.format("Classroom '%s' (id: %d) belongs to academic year '%s', but enrollment is for '%s'", 
+                    classroom.getName(), classroom.getId(), classroom.getAcademicYear(), request.getAcademicYear()));
+        }
+        
         // if enrollment already exists
         if (enrollmentRepository.existsByStudentIdAndClassroomIdAndAcademicYear(
                 request.getStudentId(), request.getClassroomId(), request.getAcademicYear())) {
@@ -114,7 +127,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollment.setNote(request.getNote());
         
         Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
-        return mapToResponseDto(updatedEnrollment);
+        return enrollmentMapper.toResponseDto(updatedEnrollment);
     }
     
     @Override
@@ -129,7 +142,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
         
         Enrollment updatedEnrollment = enrollmentRepository.save(enrollment);
-        return mapToResponseDto(updatedEnrollment);
+        return enrollmentMapper.toResponseDto(updatedEnrollment);
     }
     
     @Override
