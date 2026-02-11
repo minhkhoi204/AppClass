@@ -22,6 +22,9 @@ public class ClassroomMapper {
         //c.setMaxStudents(dto.getMaxStudents());
         c.setSchedule(dto.getSchedule());
         c.setNote(dto.getNote());
+        c.setClassOrder(dto.getClassOrder());
+        c.setNextClassroomName(dto.getNextClassroomName());
+        c.setIsFinalClass(dto.getIsFinalClass() != null ? dto.getIsFinalClass() : false);
         // c.setStudentIds(dto.getStudentIds() != null ? new HashSet<>(dto.getStudentIds()) : new HashSet<>());
         // c.setCatechistIds(dto.getCatechistIds() != null ? new HashSet<>(dto.getCatechistIds()) : new HashSet<>());
         return c;
@@ -37,6 +40,9 @@ public class ClassroomMapper {
         //dto.setMaxStudents(classroom.getMaxStudents());
         dto.setSchedule(classroom.getSchedule());
         dto.setNote(classroom.getNote());
+        dto.setClassOrder(classroom.getClassOrder());
+        dto.setNextClassroomName(classroom.getNextClassroomName());
+        dto.setIsFinalClass(classroom.getIsFinalClass());
         // dto.setStudentIds(classroom.getStudentIds());
         // dto.setCatechistIds(classroom.getCatechistIds());
         return dto;
