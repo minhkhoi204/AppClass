@@ -44,6 +44,13 @@ public class StudentController {
         StudentResponseDto response = studentService.getStudentById(id);
         return ResponseEntity.ok(new ApiResponse("Student retrieved successfully", response));
     }
+    
+    @GetMapping("/batch")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<StudentResponseDto>> getStudentsByIds(@RequestParam("ids") List<Long> ids) {
+        List<StudentResponseDto> students = studentService.getStudentsByIds(new java.util.HashSet<>(ids));
+        return ResponseEntity.ok(students);
+    }
 
     @PostMapping("/create-with-user")
     @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI', 'THU_KY')")
