@@ -1,5 +1,7 @@
 package com.programming.management_service.controller;
 
+import com.programming.common.common_dto.catechist.CatechistResponseDto;
+import com.programming.common.common_dto.student.StudentResponseDto;
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
 import com.programming.management_service.mapper.ClassroomMapper;
@@ -34,6 +36,7 @@ public class ClassroomController {
                 .body(new ApiResponse("Classroom created successfully", responseDto));
     }
 
+    /*
     @PostMapping("/{classroomId}/students/{studentId}/add")
     @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI', 'THU_KY')")
     public ResponseEntity<ApiResponse> addStudentToClassroom(@PathVariable Long classroomId,
@@ -49,7 +52,9 @@ public class ClassroomController {
         classroomService.removeStudentFromClassroom(classroomId, studentId);
         return ResponseEntity.ok(new ApiResponse("Student removed from classroom successfully", null));
     }
+    */
 
+    /*
     @PostMapping("/{classroomId}/catechists/{catechistId}/add")
     @PreAuthorize("hasAnyRole('DOAN_TRUONG', 'PHO_NOI', 'PHO_NGOAI')")
     public ResponseEntity<ApiResponse> addCatechistToClassroom(@PathVariable Long classroomId,
@@ -65,6 +70,7 @@ public class ClassroomController {
         classroomService.removeCatechistFromClassroom(classroomId, catechistId);
         return ResponseEntity.ok(new ApiResponse("Catechist removed from classroom successfully", null));
     }
+    */
 
     @GetMapping("/{classroomId}")
     @PreAuthorize("isAuthenticated()")
@@ -79,6 +85,28 @@ public class ClassroomController {
                                                        @RequestBody ClassroomRequestDto classroomRequestDto) {
         ClassroomResponseDto updated = classroomService.updateClassroom(classroomId, classroomRequestDto);
         return ResponseEntity.ok(new ApiResponse("Classroom updated successfully", updated));
+    }
+
+    // get all students in a classroom
+    @GetMapping("/{classroomId}/students")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse> getStudentsInClassroom(
+            @PathVariable Long classroomId,
+            @RequestParam String academicYear) {
+        List<StudentResponseDto> students = classroomService.getStudentsInClassroom(classroomId, academicYear);
+        return ResponseEntity.ok(new ApiResponse(
+                "Found " + students.size() + " student(s) in classroom", students));
+    }
+
+    // get all catechists in a classroom
+    @GetMapping("/{classroomId}/catechists")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse> getCatechistsInClassroom(
+            @PathVariable Long classroomId,
+            @RequestParam String academicYear) {
+        List<CatechistResponseDto> catechists = classroomService.getCatechistsInClassroom(classroomId, academicYear);
+        return ResponseEntity.ok(new ApiResponse(
+                "Found " + catechists.size() + " catechist(s) in classroom", catechists));
     }
 
 }

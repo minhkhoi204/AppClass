@@ -71,6 +71,13 @@ public class StudentServiceImpl implements StudentService {
 
         return studentMapper.toStudentResponseDto(student);
     }
+    
+    @Override
+    public java.util.List<StudentResponseDto> getStudentsByIds(java.util.Set<Long> studentIds) {
+        return studentRepository.findAllById(studentIds).stream()
+                .map(studentMapper::toStudentResponseDto)
+                .collect(java.util.stream.Collectors.toList());
+    }
 
     @Override //check again about checking userid instead
     public StudentResponseDto createStudentWithUserId(StudentRequestDto studentDto, Long userId) {

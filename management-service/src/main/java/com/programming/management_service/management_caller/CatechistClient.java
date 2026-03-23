@@ -9,6 +9,8 @@ import com.programming.management_service.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @FeignClient(
         name = "user-service",
         url = "${user.service.url}",
@@ -19,6 +21,9 @@ public interface CatechistClient {
 
     @GetMapping("/api/catechists/{id}")
     ApiResponse getCatechistById(@PathVariable("id") Long id);
+
+    @GetMapping("/api/catechists/batch")
+    List<CatechistResponseDto> getCatechistsByIds(@RequestParam("ids") List<Long> ids);
 
     @PutMapping("/api/catechists/{id}/update")
     CatechistResponseDto updateCatechist(@PathVariable("id") Long catechistId,

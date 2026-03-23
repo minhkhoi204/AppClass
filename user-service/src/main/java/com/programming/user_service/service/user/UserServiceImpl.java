@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +81,14 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return userMapper.toUserResponseDto(user);
+    }
+    
+    @Override
+    public List<UserResponseDto> getUsersByIds(Set<Long> ids) {
+        List<User> users = userRepository.findAllById(ids);
+        return users.stream()
+                .map(userMapper::toUserResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override

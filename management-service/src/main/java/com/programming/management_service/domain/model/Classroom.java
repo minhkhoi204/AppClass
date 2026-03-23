@@ -31,10 +31,16 @@ public class Classroom {
     private String schedule; // "Sunday 7:00 AM - 9:00 AM"
     
     private String note;
-
-    @ElementCollection
-    private Set<Long> studentIds = new HashSet<>();
     
-    @ElementCollection
-    private Set<Long> catechistIds = new HashSet<>(); 
+    // place order in the grade system
+    @Column(name = "class_order")
+    private Integer classOrder;
+    
+    @Column(name = "next_classroom_name", length = 100)
+    private String nextClassroomName;
+
+    // check if final class in system
+    @Column(name = "is_final_class")
+    private Boolean isFinalClass = false;
+
 }

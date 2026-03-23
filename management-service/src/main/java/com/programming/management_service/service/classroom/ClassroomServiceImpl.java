@@ -12,11 +12,14 @@ import com.programming.common.response.ApiResponse;
 
 import com.programming.management_service.domain.dto.request.ClassroomRequestDto;
 import com.programming.management_service.domain.dto.response.ClassroomResponseDto;
+import com.programming.management_service.domain.model.AssignmentStatus;
 import com.programming.management_service.domain.model.Classroom;
 import com.programming.management_service.management_caller.CatechistClient;
 import com.programming.management_service.management_caller.StudentClient;
 import com.programming.management_service.mapper.ClassroomMapper;
+import com.programming.management_service.repository.ClassroomAssignmentRepository;
 import com.programming.management_service.repository.ClassroomRepository;
+import com.programming.management_service.repository.EnrollmentRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -35,6 +38,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class ClassroomServiceImpl implements ClassroomService {
 
     private final ClassroomRepository classroomRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final ClassroomAssignmentRepository assignmentRepository;
     private final StudentClient studentClient;
     private final CatechistClient catechistClient;
     private final ClassroomMapper classroomMapper;
@@ -42,15 +47,15 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Override
     public ClassroomResponseDto createClassroom(ClassroomRequestDto dto) {
-        if (classroomRepository.existsByName(dto.getName())) {
-            throw new AlreadyExistsException("Classroom: '" + dto.getName() + "' already exists");
+        if (!classroomRepository.findByNameAndAcademicYear(dto.getName(), dto.getAcademicYear()).isEmpty()) {
+            throw new AlreadyExistsException("Classroom: '" + dto.getName() + "' already exists for academic year: " + dto.getAcademicYear());
         }
 
         Classroom classroom = classroomMapper.toClassroomEntity(dto);
         Classroom saved = classroomRepository.save(classroom);
         return classroomMapper.toClassroomResponseDto(saved);
     }
-
+    /* 
     private List<StudentResponseDto> getStudentsInClassroom(Classroom classroom) {
         return classroom.getStudentIds().stream()
                 .map(studentId -> {
@@ -59,6 +64,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                 })
                 .collect(Collectors.toList());
     }
+    */
 
     @Override
     public ClassroomResponseDto getClassroomById(Long id) {
@@ -66,10 +72,11 @@ public class ClassroomServiceImpl implements ClassroomService {
                 .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + id));
 
         ClassroomResponseDto dto = classroomMapper.toClassroomResponseDto(classroom);
-        dto.setStudents(getStudentsInClassroom(classroom));
+        //dto.setStudents(getStudentsInClassroom(classroom));
         return dto;
     }
 
+    /* 
     @Override
     public void addStudentToClassroom(Long classroomId, Long studentId) {
         Classroom classroom = classroomRepository.findById(classroomId)
@@ -97,6 +104,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         studentClient.updateStudent(studentId, updatedStudentDto);
     }
+    */
 
 
 //    @Override
@@ -147,17 +155,18 @@ public class ClassroomServiceImpl implements ClassroomService {
         if (requestDto.getNote() != null) {
             classroom.setNote(requestDto.getNote());
         }
-        if (requestDto.getStudentIds() != null) {
-            classroom.setStudentIds(new HashSet<>(requestDto.getStudentIds()));
-        }
-        if (requestDto.getCatechistIds() != null) {
-            classroom.setCatechistIds(new HashSet<>(requestDto.getCatechistIds()));
-        }
+        // if (requestDto.getStudentIds() != null) {
+        //     classroom.setStudentIds(new HashSet<>(requestDto.getStudentIds()));
+        // }
+        // if (requestDto.getCatechistIds() != null) {
+        //     classroom.setCatechistIds(new HashSet<>(requestDto.getCatechistIds()));
+        // }
 
         Classroom updated = classroomRepository.save(classroom);
         return classroomMapper.toClassroomResponseDto(updated);
     }
 
+    /*
     @Override
     public void removeStudentFromClassroom(Long classroomId, Long studentId) {
         Classroom classroom = classroomRepository.findById(classroomId)
@@ -175,7 +184,9 @@ public class ClassroomServiceImpl implements ClassroomService {
         updatedStudentDto.setClassroomId(null);
         studentClient.updateStudent(studentId, updatedStudentDto);
     }
+    */
 
+    /*
     @Override
     public void addCatechistToClassroom(Long classroomId, Long catechistId) {
         Classroom classroom = classroomRepository.findById(classroomId)
@@ -199,7 +210,9 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         catechistClient.updateCatechist(catechistId, updatedCatechistDto);
     }
+    */
 
+    /*
     @Override
     public void removeCatechistFromClassroom(Long classroomId, Long catechistId) {
         Classroom classroom = classroomRepository.findById(classroomId)
@@ -212,5 +225,83 @@ public class ClassroomServiceImpl implements ClassroomService {
         classroom.getCatechistIds().remove(catechistId);
         classroomRepository.save(classroom);
     }
+    */
 
+    @Override
+    public List<Long> getStudentIds(Long classroomId, String academicYear) {
+        return enrollmentRepository.findByClassroomIdAndAcademicYear(classroomId, academicYear)
+                .stream()
+                .map(enrollment -> enrollment.getStudentId())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> getCatechistIds(Long classroomId, String academicYear) {
+        return assignmentRepository.findByClassroomIdAndAcademicYearAndStatus(
+                        classroomId, academicYear, AssignmentStatus.ACTIVE)
+                .stream()
+                .map(assignment -> assignment.getCatechistId())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getStudentCount(Long classroomId, String academicYear) {
+        return enrollmentRepository.countByClassroomIdAndAcademicYear(classroomId, academicYear);
+    }
+
+    @Override
+    public int getCatechistCount(Long classroomId, String academicYear) {
+        Integer count = assignmentRepository.countByClassroomIdAndAcademicYearAndStatus(
+                classroomId, academicYear, AssignmentStatus.ACTIVE);
+        return count != null ? count : 0;
+    }
+
+    @Override
+    public List<StudentResponseDto> getStudentsInClassroom(Long classroomId, String academicYear) {
+        classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + classroomId));
+        
+        // get student ids from enrollments
+        List<Long> studentIds = enrollmentRepository.findByClassroomIdAndAcademicYear(classroomId, academicYear)
+                .stream()
+                .map(enrollment -> enrollment.getStudentId())
+                .collect(Collectors.toList());
+        
+        if (studentIds.isEmpty()) {
+            return List.of();
+        }
+        /*
+         ApiResponse response = studentClient.getStudentsByIds(new HashSet<>(studentIds));
+        List<Object> dataList = (List<Object>) response.getData();
+        return dataList.stream()
+                .map(data -> objectMapper.convertValue(data, StudentResponseDto.class))
+                .collect(Collectors.toList());
+        */
+        //return studentClient.getStudentsByIds(new HashSet<>(studentIds));
+        return studentClient.getStudentsByIds(studentIds);
+    }
+
+    @Override
+    public List<CatechistResponseDto> getCatechistsInClassroom(Long classroomId, String academicYear) {
+        // get catechist ids from assignments
+        List<Long> catechistIds = assignmentRepository
+                .findByClassroomIdAndAcademicYearAndStatus(classroomId, academicYear, AssignmentStatus.ACTIVE)
+                .stream()
+                .map(assignment -> assignment.getCatechistId())
+                .collect(Collectors.toList());
+        
+        if (catechistIds.isEmpty()) {
+            return List.of();
+        }
+        /*
+        ApiResponse response = studentClient.getStudentsByIds(new HashSet<>(studentIds));
+        List<Object> dataList = (List<Object>) response.getData();
+        return dataList.stream()
+                .map(data -> objectMapper.convertValue(data, StudentResponseDto.class))
+
+                .collect(Collectors.toList());
+        */
+        //return catechistClient.getCatechistsByIds(new HashSet<>(catechistIds));
+        return catechistClient.getCatechistsByIds(catechistIds);
+    }
 }

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("${api.prefix}/students")
@@ -43,6 +45,13 @@ public class StudentController {
     public ResponseEntity<ApiResponse> getStudentById(@PathVariable Long id) {
         StudentResponseDto response = studentService.getStudentById(id);
         return ResponseEntity.ok(new ApiResponse("Student retrieved successfully", response));
+    }
+    
+    @GetMapping("/batch")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<StudentResponseDto>> getStudentsByIds(@RequestParam("ids") List<Long> ids) {
+        List<StudentResponseDto> students = studentService.getStudentsByIds(new java.util.HashSet<>(ids));
+        return ResponseEntity.ok(students);
     }
 
     @PostMapping("/create-with-user")
